@@ -1,6 +1,11 @@
 const { Level2Parser } = require('./Level2Parser')
 const { MESSAGE_HEADER_SIZE, FILE_HEADER_SIZE, RADAR_DATA_SIZE, CTM_HEADER_SIZE } = require('../constants')
 
+
+// message parsers
+const parseMessage1 = require('./Level2Record-1');
+const parseMessage31 = require('./Level2Record-31');
+const parseMessage5 = require('./Level2Record-5-7');
 /**
  * Returns a record from the loaded radar data
  */
@@ -177,93 +182,12 @@ class Level2Record {
             segment_number: raf.readShort()
         }
 
-        if(message.message_type == 31) {
-            message.record = {
-                id: raf.readString(4),
-                mseconds: raf.readInt(),
-                julian_date: raf.readShort(),
-                radial_number: raf.readShort(),
-                azimuth: raf.readFloat(),
-                compress_idx: raf.readByte(),
-                sp: raf.readByte(),
-                radial_length: raf.readShort(),
-                ars: raf.readByte(),
-                rs: raf.readByte(),
-                elevation_number: raf.readByte(),
-                cut: raf.readByte(),
-                elevation_angle: raf.readFloat(),
-                rsbs: raf.readByte(),
-                aim: raf.readByte(),
-                dcount: raf.readShort()
-            }
-
-            /**
-             * Read and save the data pointers from the file
-             * so we know where to start reading within the file
-             * to grab the data from the data blocks
-             * See page 114 of https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
-             */
-            let dbp1 = raf.readInt()
-            let dbp2 = raf.readInt()
-            let dbp3 = raf.readInt()
-            let dbp4 = raf.readInt()
-            let dbp5 = raf.readInt()
-            let dbp6 = raf.readInt()
-            let dbp7 = raf.readInt()
-            let dbp8 = raf.readInt()
-            let dbp9 = raf.readInt()
-
-            /**
-             * Parse all of our data inside the datablocks
-             * and save it to the message.record Object
-             */
-            this._parseVolumeData(raf, message.record, dbp1)
-            this._parseElevationData(raf, message.record, dbp2)
-            this._parseRadialData(raf, message.record, dbp3)
-            this._parseMomentData(raf, message.record, dbp4, 'REF')
-            this._parseMomentData(raf, message.record, dbp5, 'VEL')
-            this._parseMomentData(raf, message.record, dbp6, 'SW')
-            this._parseMomentData(raf, message.record, dbp7, 'ZDR')
-            this._parseMomentData(raf, message.record, dbp8, 'PHI')
-            this._parseMomentData(raf, message.record, dbp9, 'RHO')
-        }
-
-        if(message.message_type == 1) {
-
-            message.record = {
-                mseconds: raf.readInt(),
-                julian_date: raf.readShort(),
-                range: raf.readShort(),
-                azmith_angle: raf.readShort(),
-                radial_number: raf.readShort(),
-                radial_status: raf.readShort(),
-                elevation_angle: raf.readShort(),
-                elevation_number: raf.readShort(),
-                reflect_first_gate: raf.readShort(),
-                doppler_first_gate: raf.readShort(),
-                reflect_gate_size: raf.readShort(),
-                doppler_gate_size: raf.readShort(),
-                reflect_gate_count: raf.readShort(),
-                doppler_gate_count: raf.readShort(),
-                cut: raf.readShort(),
-                calibration: raf.readFloat(),
-                reflect_offset: raf.readShort(),
-                velocity_offset: raf.readShort(),
-                width_offset: raf.readShort(),
-                resolution: raf.readShort(),
-                vcp: raf.readShort()
-            }
-
-            raf.skip(14)
-
-            message.record.nyquist_vel = raf.readShort()
-            message.record.attenuation = raf.readShort()
-            message.record.threshold = raf.readShort()
-            message.record.has_reflection_data = message.record.reflect_gate_count > 0
-            message.record.has_doppler_data = message.record.doppler_gate_count > 0
-        }
-
-        return message
+        switch (message.message_type) {
+			case 31: return parseMessage31(raf,message,this);
+			case 1: return parseMessage1(raf,message);
+			case 5:
+			case 7: return parseMessage5(raf,message);
+		}
     }
 }
 
