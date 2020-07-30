@@ -20,11 +20,11 @@ class Level2Radar {
 
     setScan(scan) {
         this.scan = scan - 1
-    }
+	}
 
     setSweep(sweep) {
         this.setScan(sweep)
-    }
+	}
 
     getAzimuth(scan) {
         if(scan) {
@@ -115,7 +115,7 @@ class Level2Radar {
                 let data = []
 
 				// decompress file if necessary, returns original file if no compression exists
-				raf = decompress(raf).then(raf=>{
+				raf = decompress(raf).then((raf,chunkMap)=>{
 
 					raf.endianOrder(BIG_ENDIAN) // Set binary ordering to Big Endian
 					raf.seek(FILE_HEADER_SIZE) // Jump to the bytes at 24, past the file header
@@ -139,8 +139,8 @@ class Level2Radar {
 							message_offset31 = message_offset31 + (r.message_size * 2 + 12 - 2432)
 						}
 
-						// skip any messages that aren't type of 1 (generic radar data) or 31 (highres radar data)
-						if(r.message_type != 1 && r.message_type != 31) continue
+						// only process specific message types
+						if (![1,5,7,31].includes(r.message_type)) continue;
 
 						// If data is found, push the record to the data array
 						if( r.record.reflect ||
@@ -150,10 +150,12 @@ class Level2Radar {
 							r.record.phi ||
 							r.record.rho) data.push(r)
 
+						if ([5,7].includes(r.message_type)) this.vcp = r;
+
 					}
 
 					// sort and group the scans by elevation asc
-					this.data = this.groupAndSortScans(data)
+					this.data = this.groupAndSortScans(data);
 
 					resolve(this)
 				});

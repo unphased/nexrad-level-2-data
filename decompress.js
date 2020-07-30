@@ -60,9 +60,17 @@ const decompress = function (raf) {
 			// combine the buffers
 			const outBuffer = Buffer.concat(outBuffers);
 
+			// create a chunk map with the starting position of each chunk for statistical analysis
+			let position = 0;
+			chunkMap = outBuffers.map(buffer => {
+				const startPos = position;
+				position += buffer.length;
+				return startPos;
+			})
+
 			// pass the buffer to RandomAccessFile and return the result
 			new RandomAccessFile(outBuffer).then(raf => {
-					resolve(raf)
+					resolve(raf, chunkMap)
 				});
 		}
 	})
