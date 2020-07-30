@@ -10,7 +10,7 @@ class RandomAccessFile {
      * Returns a promise once the file has been
      * loaded into the buffer
      */
-    constructor(file) {
+    constructor(file, chunkMap) {
         this.offset = 0
         this.buffer = null
         this.bigEndian = false

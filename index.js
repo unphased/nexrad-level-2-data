@@ -111,11 +111,12 @@ class Level2Radar {
              * after the file has been fully loaded into the
              * buffer.
              */
-            new RandomAccessFile(file).then(raf => {
+            new RandomAccessFile(file).then((raf) => {
                 let data = []
 
 				// decompress file if necessary, returns original file if no compression exists
-				raf = decompress(raf).then((raf,chunkMap)=>{
+				raf = decompress(raf).then((decompressed)=>{
+					const {raf,chunkMap} = decompressed;
 
 					raf.endianOrder(BIG_ENDIAN) // Set binary ordering to Big Endian
 					raf.seek(FILE_HEADER_SIZE) // Jump to the bytes at 24, past the file header
@@ -141,6 +142,11 @@ class Level2Radar {
 
 						// only process specific message types
 						if (![1,5,7,31].includes(r.message_type)) continue;
+
+						// get chunk
+						if (chunkMap) {
+							r.chunk = chunkMap.findIndex(end=>raf.getPos()<end)-1;
+						}
 
 						// If data is found, push the record to the data array
 						if( r.record.reflect ||
@@ -203,5 +209,6 @@ class Level2Radar {
         return groups
     }
 }
+
 
 module.exports.Level2Radar = Level2Radar
