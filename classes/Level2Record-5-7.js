@@ -13,7 +13,7 @@ module.exports = (raf, message) => {
 		pulse_width: pulse_width(raf.readByte()),
 		reserved1: raf.readInt(),
 		vcp_sequencing: vcp_sequencing(raf.readShort()),
-		vcp_supplemental_raw: raf.readShort(),
+		vcp_supplemental: vcp_supplemental(raf.readShort()),
 		reserved2: raf.readShort(),
 	}
 
@@ -94,6 +94,17 @@ const vcp_sequencing = (raw) => ({
 	max_sails_cuts: parseBits(raw,5,6),
 	sequence_active: parseBits(raw,13),
 	truncated_vcp: parseBits(raw,14),
+});
+
+// parse vcp supplemental data
+const vcp_supplemental = (raw) => ({
+	sails_vcp: parseBits(raw,0),
+	number_sails_cuts: parseBits(raw,1,3),
+	mrle_vcp: parseBits(raw,4),
+	number_mrle_cuts: parseBits(raw,5,7),
+	mpda_vcp: parseBits(raw,11),
+	base_tilt_vcp: parseBits(raw,12),
+	number_base_tilts: parseBits(raw,13,15),
 });
 
 // parse super resolution control
