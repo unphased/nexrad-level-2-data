@@ -119,7 +119,20 @@ class Level2Radar {
 					const {raf,chunkMap} = decompressed;
 
 					raf.endianOrder(BIG_ENDIAN) // Set binary ordering to Big Endian
-					raf.seek(FILE_HEADER_SIZE) // Jump to the bytes at 24, past the file header
+
+					// read the file header
+					const header = {};
+					// fixed at AR2V00
+					raf.skip('AR2V00'.length);
+					header.version = raf.readString(2);
+					raf.skip('.001'.length);
+					header.modified_julian_date = raf.readInt();
+					header.milliseconds = raf.readInt();
+					header.ICAO = raf.readString(4);
+					// start over to grab the raw header
+					raf.seek(0);
+					header.raw = raf.read(FILE_HEADER_SIZE);
+					this.header = header;
 
 					let message_offset31 = 0 // the current message 31 offset
 					let recno = 0 // the record number

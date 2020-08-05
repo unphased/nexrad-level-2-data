@@ -159,7 +159,7 @@ class Level2Record {
      * |--------------|-----------------------------|
      * | 2            | RDA Status                  |
      * | 3            | RDA Performance/Maintenance |
-     * | 5            | RDA Volume Coverage         |
+     * | 5,7          | RDA Volume Coverage         |
      * | 13           | Clutter Filter Bypass Map   |
      * | 15           | Clutter Map                 |
      * | 18           | RDA Adaptable Parameters    |
@@ -182,6 +182,7 @@ class Level2Record {
             segment_number: raf.readShort()
         }
 
+		console.log(message.message_type);
         switch (message.message_type) {
 			case 31: return parseMessage31(raf,message,this);
 			case 1: return parseMessage1(raf,message);
