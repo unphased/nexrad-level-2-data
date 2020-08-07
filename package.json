@@ -7,5 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Matt Johnston",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "seek-bzip": "^2.0.0"
+  }
 }
