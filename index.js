@@ -74,8 +74,16 @@ class Level2Radar {
 	}
 
     // return velocity data for the current elevation and scan
-    getHighresVelocity() {
-        return this.data[this.elevation][this.scan].record.velocity
+    getHighresVelocity(scan) {
+		if(scan) {
+            return this.data[this.elevation][scan].record.velocity
+        } else {
+            let scans = []
+            for(let i = 0; i < this.data[this.elevation].length; i++) {
+                scans.push(this.data[this.elevation][i].record.velocity)
+            }
+            return scans
+        }
     }
 
     // return spectrum data for the current elevation and scan
