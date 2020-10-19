@@ -152,7 +152,16 @@ class Level2Radar {
 					 */
 					while(true) {
 
-						let r = new Level2Record(raf, recno++, message_offset31)
+						let r;
+						try {
+							r = new Level2Record(raf, recno++, message_offset31)
+						}
+						catch (e) {
+							// parsing error, report error then set this chunk as finished
+							console.error('Message terminated early');
+							console.error(e);
+							r = {finished: true};
+						}
 
 						if(r.finished) break // no more messages, exit the loop
 
