@@ -1,65 +1,65 @@
-const { MESSAGE_HEADER_SIZE } = require('../constants')
+const { MESSAGE_HEADER_SIZE } = require('../constants');
 
 class Level2Parser {
-    constructor(raf = null, dbp = null, offset = null) {
-        this._raf = raf
-        this._dbp = dbp
-        this._record_offset = offset
-    }
+	constructor(raf = null, dbp = null, offset = null) {
+		this._raf = raf;
+		this._dbp = dbp;
+		this._record_offset = offset;
+	}
 
-    setRaf(raf) {
-        this._raf = raf
-    }
+	setRaf(raf) {
+		this._raf = raf;
+	}
 
-    setDataBlockPointer(dbp) {
-        this._dbp = dbp
-    }
+	setDataBlockPointer(dbp) {
+		this._dbp = dbp;
+	}
 
-    setRecordOffset(offset) {
-        this._record_offset = offset
-    }
+	setRecordOffset(offset) {
+		this._record_offset = offset;
+	}
 
-    getDataBlockByte(skip) {
-        this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE)
-        this._raf.skip(skip)
+	getDataBlockByte(skip) {
+		this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE);
+		this._raf.skip(skip);
 
-        return this._raf.read()
-    }
+		return this._raf.read();
+	}
 
-    getDataBlockInt(skip) {
-        this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE)
-        this._raf.skip(skip)
+	getDataBlockInt(skip) {
+		this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE);
+		this._raf.skip(skip);
 
-        return this._raf.readInt()
-    }
+		return this._raf.readInt();
+	}
 
-    getDataBlockBytes(skip, size) {
-        this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE)
-        this._raf.skip(skip)
+	getDataBlockBytes(skip, size) {
+		this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE);
+		this._raf.skip(skip);
 
-        return this._raf.read(size)
-    }
+		return this._raf.read(size);
+	}
 
-    getDataBlockShort(skip) {
-        this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE)
-        this._raf.skip(skip)
+	getDataBlockShort(skip) {
+		this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE);
+		this._raf.skip(skip);
 
-        return this._raf.readShort()
-    }
+		return this._raf.readShort();
+	}
 
-    getDataBlockFloat(skip) {
-        this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE)
-        this._raf.skip(skip)
+	getDataBlockFloat(skip) {
+		this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE);
+		this._raf.skip(skip);
 
-        return this._raf.readFloat()
-    }
+		return this._raf.readFloat();
+	}
 
-    getDataBlockString(skip, size) {
-        this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE)
-        this._raf.skip(skip)
+	getDataBlockString(skip, size) {
+		this._raf.seek(this._dbp + this._record_offset + MESSAGE_HEADER_SIZE);
+		this._raf.skip(skip);
 
-        return this._raf.readString(size)
-    }
+		return this._raf.readString(size);
+	}
 }
 
-module.exports.Level2Parser = Level2Parser
+module.exports.Level2Parser = Level2Parser;

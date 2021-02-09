@@ -1,7 +1,5 @@
-'use strict'
 // parse message type 1
 module.exports = (raf, message) => {
-
 	message.record = {
 		mseconds: raf.readInt(),
 		julian_date: raf.readShort(),
@@ -23,16 +21,16 @@ module.exports = (raf, message) => {
 		velocity_offset: raf.readShort(),
 		width_offset: raf.readShort(),
 		resolution: raf.readShort(),
-		vcp: raf.readShort()
-	}
+		vcp: raf.readShort(),
+	};
 
-	raf.skip(14)
+	raf.skip(14);
 
-	message.record.nyquist_vel = raf.readShort()
-	message.record.attenuation = raf.readShort()
-	message.record.threshold = raf.readShort()
-	message.record.has_reflection_data = message.record.reflect_gate_count > 0
-	message.record.has_doppler_data = message.record.doppler_gate_count > 0
+	message.record.nyquist_vel = raf.readShort();
+	message.record.attenuation = raf.readShort();
+	message.record.threshold = raf.readShort();
+	message.record.has_reflection_data = message.record.reflect_gate_count > 0;
+	message.record.has_doppler_data = message.record.doppler_gate_count > 0;
 
 	return message;
-}
+};
