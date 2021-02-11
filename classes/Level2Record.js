@@ -112,42 +112,44 @@ class Level2Record {
 				moment_data: [],
 			};
 
+			// allow for different sized data blocks
+			let getDataBlock = parser.getDataBlockByte.bind(parser);
+			let inc = 1;
+			if (data.data_size === 16) {
+				getDataBlock = parser.getDataBlockShort.bind(parser);
+				inc = 2;
+			}
+
+			const endI = 28+data.gate_count*inc;
+
+			for (let i = 28; i <= endI; i += inc) {
+				let val = getDataBlock(i);
+				// per documentation 0 = below threshold, 1 = range folding
+				if (val >= 2) {
+					data.moment_data.push((val - data.offset) / data.scale);
+					
+				} else {
+					data.moment_data.push(null);
+				}
+			}
+
 			switch (type) {
 			case 'REF':
-				for (let i = 28; i <= 1867; i += 1) {
-					data.moment_data.push((parser.getDataBlockByte(i) - data.offset) / data.scale);
-				}
 				record.reflect = data;
 				break;
 			case 'VEL':
-				for (let i = 28; i <= 1227; i += 1) {
-					data.moment_data.push((parser.getDataBlockByte(i) - data.offset) / data.scale);
-				}
 				record.velocity = data;
 				break;
 			case 'SW':
-				for (let i = 28; i <= 1227; i += 1) {
-					data.moment_data.push((parser.getDataBlockByte(i) - data.offset) / data.scale);
-				}
 				record.spectrum = data;
 				break;
 			case 'ZDR':
-				for (let i = 28; i <= 1227; i += 1) {
-					data.moment_data.push((parser.getDataBlockByte(i) - data.offset) / data.scale);
-				}
 				record.zdr = data;
 				break;
-				/* case 'PHI':
-                    for(let i = 28; i <= 1227; i += 2) {
-                        data.moment_data.push((parser.getDataBlockShort(i) - data.offset) / data.scale)
-                    }
-                    record.phi = data
-                    break */
+			case 'PHI':
+				record.phi = data
+				break
 			case 'RHO':
-				// RHO - getting indexing errors - !!FIX!!
-				for (let i = 28; i <= 1227; i += 1) {
-					data.moment_data.push((parser.getDataBlockByte(i) - data.offset) / data.scale);
-				}
 				record.rho = data;
 				break;
 			default: return false;
