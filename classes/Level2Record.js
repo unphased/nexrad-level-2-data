@@ -11,8 +11,9 @@ const parseMessage5 = require('./Level2Record-5-7');
  * Returns a record from the loaded radar data
  */
 class Level2Record {
-	constructor(raf, record, message31Offset) {
+	constructor(raf, record, message31Offset, options) {
 		this._record_offset = record * RADAR_DATA_SIZE + FILE_HEADER_SIZE + message31Offset;
+		this.options = options;
 
 		// passed the buffer, finished reading the file
 		if (this._record_offset >= raf.getLength()) return { finished: true };

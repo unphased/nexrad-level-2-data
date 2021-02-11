@@ -42,12 +42,13 @@ module.exports = (raf, message, obj) => {
 	obj.parseVolumeData(raf, message.record, dbp1);
 	obj.parseElevationData(raf, message.record, dbp2);
 	obj.parseRadialData(raf, message.record, dbp3);
-	obj.parseMomentData(raf, message.record, dbp4, 'REF');
-	obj.parseMomentData(raf, message.record, dbp5, 'VEL');
-	obj.parseMomentData(raf, message.record, dbp6, 'SW');
-	obj.parseMomentData(raf, message.record, dbp7, 'ZDR');
-	obj.parseMomentData(raf, message.record, dbp8, 'PHI');
-	obj.parseMomentData(raf, message.record, dbp9, 'RHO');
+	// only process requested data
+	if (obj.options.parseTypes.includes('REF')) obj.parseMomentData(raf, message.record, dbp4, 'REF');
+	if (obj.options.parseTypes.includes('VEL')) obj.parseMomentData(raf, message.record, dbp5, 'VEL');
+	if (obj.options.parseTypes.includes('SW')) obj.parseMomentData(raf, message.record, dbp6, 'SW');
+	if (obj.options.parseTypes.includes('ZDR')) obj.parseMomentData(raf, message.record, dbp7, 'ZDR');
+	if (obj.options.parseTypes.includes('PHI')) obj.parseMomentData(raf, message.record, dbp8, 'PHI');
+	if (obj.options.parseTypes.includes('RHO')) obj.parseMomentData(raf, message.record, dbp9, 'RHO');
 
 	return message;
 };

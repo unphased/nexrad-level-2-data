@@ -3,10 +3,17 @@ const { Level2Record } = require('./classes/Level2Record');
 const { BIG_ENDIAN, FILE_HEADER_SIZE } = require('./constants');
 const decompress = require('./decompress');
 
+// defaults
+const PARSE_TYPES = ['REF', 'VEL', 'SW', 'ZDR', 'PHI', 'RHO'];
+
 class Level2Radar {
-	constructor(file) {
+	constructor(file, options) {
 		this.elevation = 0;
 		this.scan = 0;
+		// options and defaults
+		this.options = {
+			parseTypes: options?.parseTypes ?? PARSE_TYPES,
+		}
 		return new Promise((resolve) => {
 			this.parseData(file).then(() => {
 				resolve(this);
@@ -51,24 +58,7 @@ class Level2Radar {
 
 	// return message_header information
 	getHeader() {
-		return {
-			id: this.data[this.elevation][this.scan].record.id,
-			mseconds: this.data[this.elevation][this.scan].record.mseconds,
-			julian_date: this.data[this.elevation][this.scan].record.julian_date,
-			radial_number: this.data[this.elevation][this.scan].record.radial_number,
-			azimuth: this.data[this.elevation][this.scan].record.azimuth,
-			compress_idx: this.data[this.elevation][this.scan].record.compress_idx,
-			sp: this.data[this.elevation][this.scan].record.sp,
-			radial_length: this.data[this.elevation][this.scan].record.radial_length,
-			ars: this.data[this.elevation][this.scan].record.ars,
-			rs: this.data[this.elevation][this.scan].record.rs,
-			elevation_number: this.data[this.elevation][this.scan].record.elevation_number,
-			cut: this.data[this.elevation][this.scan].record.cut,
-			elevation: this.data[this.elevation][this.scan].record.elevation,
-			rsbs: this.data[this.elevation][this.scan].record.rsbs,
-			aim: this.data[this.elevation][this.scan].record.aim,
-			dcount: this.data[this.elevation][this.scan].record.dcount,
-		};
+		return this.data[this.elevation][this.scan].record;
 	}
 
 	// return velocity data for the current elevation and scan
@@ -150,7 +140,7 @@ class Level2Radar {
 					while (true) {
 						let r;
 						try {
-							r = new Level2Record(raf, recno, messageOffset31);
+							r = new Level2Record(raf, recno, messageOffset31, this.options);
 							recno += 1;
 						} catch (e) {
 							// parsing error, report error then set this chunk as finished
