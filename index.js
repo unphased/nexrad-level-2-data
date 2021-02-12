@@ -165,8 +165,6 @@ class Level2Radar {
 
 		// sort and group the scans by elevation asc
 		this.data = Level2Radar.groupAndSortScans(data);
-
-		return this;
 	}
 
 	/**
