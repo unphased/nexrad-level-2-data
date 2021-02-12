@@ -13,7 +13,7 @@ class Level2Radar {
 		// options and defaults
 		this.options = {
 			parseTypes: options?.parseTypes ?? PARSE_TYPES,
-		}
+		};
 		return new Promise((resolve) => {
 			this.parseData(file).then(() => {
 				resolve(this);
@@ -137,8 +137,8 @@ class Level2Radar {
 					 * contained within the radar archive file.
 					 * Save all the data we find to it's respective array
 					 */
-					while (true) {
-						let r;
+					let r;
+					do {
 						try {
 							r = new Level2Record(raf, recno, messageOffset31, this.options);
 							recno += 1;
@@ -149,31 +149,31 @@ class Level2Radar {
 							r = { finished: true };
 						}
 
-						if (r.finished) break; // no more messages, exit the loop
-
-						if (r.message_type === 31) {
+						if (!r.finished) {
+							if (r.message_type === 31) {
 							// found a message 31 type, update the offset
-							messageOffset31 += (r.message_size * 2 + 12 - 2432);
+								messageOffset31 += (r.message_size * 2 + 12 - 2432);
+							}
+
+							// only process specific message types
+							if ([1, 5, 7, 31].includes(r.message_type)) {
+								// get chunk
+								if (chunkMap) {
+									r.chunk = chunkMap.findIndex((end) => raf.getPos() < end) - 1;
+								}
+
+								// If data is found, push the record to the data array
+								if (r.record.reflect
+								|| r.record.velocity
+								|| r.record.spectrum
+								|| r.record.zdr
+								|| r.record.phi
+								|| r.record.rho) data.push(r);
+
+								if ([5, 7].includes(r.message_type)) this.vcp = r;
+							}
 						}
-
-						// only process specific message types
-						if (![1, 5, 7, 31].includes(r.message_type)) continue;
-
-						// get chunk
-						if (chunkMap) {
-							r.chunk = chunkMap.findIndex((end) => raf.getPos() < end) - 1;
-						}
-
-						// If data is found, push the record to the data array
-						if (r.record.reflect
-							|| r.record.velocity
-							|| r.record.spectrum
-							|| r.record.zdr
-							|| r.record.phi
-							|| r.record.rho) data.push(r);
-
-						if ([5, 7].includes(r.message_type)) this.vcp = r;
-					}
+					} while (!r.finished);
 
 					// sort and group the scans by elevation asc
 					this.data = Level2Radar.groupAndSortScans(data);
@@ -190,7 +190,7 @@ class Level2Radar {
      * between different elevations, if available.
      */
 	static groupAndSortScans(scans) {
-		let groups = [];
+		const groups = [];
 
 		// map the scans
 		scans.forEach((scan) => {
@@ -200,9 +200,6 @@ class Level2Radar {
              * If the group has already been created
              * just push the current scan into the array
              * or create a new group for the elevation
-             * NOTE: !! we need to convert the numbers to a
-             * string so that javascript doesn't freak out
-             * look into fixing !!
              */
 			if (groups[elevationNumber]) {
 				groups[elevationNumber].push(scan);
@@ -212,7 +209,7 @@ class Level2Radar {
 		});
 
 		// Sort by elevation number ascending
-		groups = groups.sort((a, b) => {
+		return groups.sort((a, b) => {
 			const aElev = a[0].record.elevation_number;
 			const bElev = b[0].record.elevation_number;
 
@@ -220,8 +217,6 @@ class Level2Radar {
 			if (aElev < bElev) return -1;
 			return 0;
 		});
-
-		return groups;
 	}
 }
 
