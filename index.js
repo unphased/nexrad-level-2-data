@@ -1,6 +1,6 @@
-const { RandomAccessFile } = require('./classes/RandomAccessFile');
+const { RandomAccessFile, BIG_ENDIAN } = require('./classes/RandomAccessFile');
 const { Level2Record } = require('./classes/Level2Record');
-const { BIG_ENDIAN, FILE_HEADER_SIZE } = require('./constants');
+const { FILE_HEADER_SIZE } = require('./constants');
 const decompress = require('./decompress');
 
 // defaults
@@ -14,11 +14,7 @@ class Level2Radar {
 		this.options = {
 			parseTypes: options?.parseTypes ?? PARSE_TYPES,
 		};
-		return new Promise((resolve) => {
-			this.parseData(file).then(() => {
-				resolve(this);
-			});
-		});
+		this.parseData(file);
 	}
 
 	setElevation(elevation) {
@@ -49,11 +45,7 @@ class Level2Radar {
 		if (scan) {
 			return this.data[this.elevation][scan].record.reflect;
 		}
-		const scans = [];
-		for (let i = 0; i < this.data[this.elevation].length; i += 1) {
-			scans.push(this.data[this.elevation][i].record.reflect);
-		}
-		return scans;
+		return this.data[this.elevation].map((elev) => elev.record.reflect);
 	}
 
 	// return message_header information
@@ -66,11 +58,7 @@ class Level2Radar {
 		if (scan) {
 			return this.data[this.elevation][scan].record.velocity;
 		}
-		const scans = [];
-		for (let i = 0; i < this.data[this.elevation].length; i += 1) {
-			scans.push(this.data[this.elevation][i].record.velocity);
-		}
-		return scans;
+		return this.data[this.elevation].map((elev) => elev.record.velocity);
 	}
 
 	// return spectrum data for the current elevation and scan
@@ -93,95 +81,92 @@ class Level2Radar {
 		return this.data[this.elevation][this.scan].record.rho;
 	}
 
+	static decompress(raf) {
+		return decompress(raf);
+	}
+
 	/**
      * Loads the file and parses the data.
      * Returns a promise when completed
      */
 	parseData(file) {
-		return new Promise((resolve) => {
-			/**
+		/**
              * Load and access the radar archive file.
              * The constructor for RandomAccessFile returns
              * a promise. This allows for parsing the data
              * after the file has been fully loaded into the
              * buffer.
              */
-			new RandomAccessFile(file).then((rafCompressed) => {
-				const data = [];
+		const rafCompressed = new RandomAccessFile(file, BIG_ENDIAN);
+		const data = [];
 
-				// decompress file if necessary, returns original file if no compression exists
-				decompress(rafCompressed).then((decompressed) => {
-					const { raf, chunkMap } = decompressed;
+		// decompress file if necessary, returns original file if no compression exists
+		const raf = Level2Radar.decompress(rafCompressed);
 
-					raf.endianOrder(BIG_ENDIAN); // Set binary ordering to Big Endian
+		// read the file header
+		const header = {};
+		// fixed at AR2V00
+		raf.skip('AR2V00'.length);
+		header.version = raf.readString(2);
+		raf.skip('.001'.length);
+		header.modified_julian_date = raf.readInt();
+		header.milliseconds = raf.readInt();
+		header.ICAO = raf.readString(4);
+		// start over to grab the raw header
+		raf.seek(0);
+		header.raw = raf.read(FILE_HEADER_SIZE);
+		this.header = header;
 
-					// read the file header
-					const header = {};
-					// fixed at AR2V00
-					raf.skip('AR2V00'.length);
-					header.version = raf.readString(2);
-					raf.skip('.001'.length);
-					header.modified_julian_date = raf.readInt();
-					header.milliseconds = raf.readInt();
-					header.ICAO = raf.readString(4);
-					// start over to grab the raw header
-					raf.seek(0);
-					header.raw = raf.read(FILE_HEADER_SIZE);
-					this.header = header;
+		let messageOffset31 = 0; // the current message 31 offset
+		let recordNumber = 0; // the record number
 
-					let messageOffset31 = 0; // the current message 31 offset
-					let recno = 0; // the record number
-
-					/**
+		/**
 					 * Loop through all of the messages
 					 * contained within the radar archive file.
 					 * Save all the data we find to it's respective array
 					 */
-					let r;
-					do {
-						try {
-							r = new Level2Record(raf, recno, messageOffset31, this.options);
-							recno += 1;
-						} catch (e) {
-							// parsing error, report error then set this chunk as finished
-							console.error('Message terminated early');
-							console.error(e);
-							r = { finished: true };
-						}
+		let r;
+		do {
+			try {
+				r = new Level2Record(raf, recordNumber, messageOffset31, this.options);
+				recordNumber += 1;
+			} catch (e) {
+				// parsing error, report error then set this chunk as finished
+				console.error('Message terminated early');
+				console.error(e);
+				r = { finished: true };
+			}
 
-						if (!r.finished) {
-							if (r.message_type === 31) {
-							// found a message 31 type, update the offset
-								messageOffset31 += (r.message_size * 2 + 12 - 2432);
-							}
+			if (!r.finished) {
+				if (r.message_type === 31) {
+					// found a message 31 type, update the offset
+					messageOffset31 += (r.message_size * 2 + 12 - 2432);
+				}
 
-							// only process specific message types
-							if ([1, 5, 7, 31].includes(r.message_type)) {
-								// get chunk
-								if (chunkMap) {
-									r.chunk = chunkMap.findIndex((end) => raf.getPos() < end) - 1;
-								}
+				// only process specific message types
+				if ([1, 5, 7, 31].includes(r.message_type)) {
+					// get chunk
+					// if (chunkMap) {
+					// 	r.chunk = chunkMap.findIndex((end) => raf.getPos() < end) - 1;
+					// }
 
-								// If data is found, push the record to the data array
-								if (r.record.reflect
+					// If data is found, push the record to the data array
+					if (r.record.reflect
 								|| r.record.velocity
 								|| r.record.spectrum
 								|| r.record.zdr
 								|| r.record.phi
 								|| r.record.rho) data.push(r);
 
-								if ([5, 7].includes(r.message_type)) this.vcp = r;
-							}
-						}
-					} while (!r.finished);
+					if ([5, 7].includes(r.message_type)) this.vcp = r;
+				}
+			}
+		} while (!r.finished);
 
-					// sort and group the scans by elevation asc
-					this.data = Level2Radar.groupAndSortScans(data);
+		// sort and group the scans by elevation asc
+		this.data = Level2Radar.groupAndSortScans(data);
 
-					resolve(this);
-				});
-			});
-		});
+		return this;
 	}
 
 	/**

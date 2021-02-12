@@ -1,14 +1,34 @@
+const fs = require('fs');
 const { Level2Radar } = require('./index');
 
 const fileToLoad = 'KTLX20130420_205120_V06'; // The radar archive file to load
+const fileToLoadCompressed = 'KLOT20200715_230602_V06'; // The radar archive file to load
 
-Math.radians = (degrees) => degrees * Math.PI / 180;
-
-new Level2Radar(fileToLoad).then((radar) => {
-	// console.log(radar.getHighresReflectivity())
+(async () => {
+	// load file into buffer
+	const data = await new Promise((resolve) => {
+		fs.readFile(fileToLoad, (err, fileData) => {
+			resolve(fileData);
+		});
+	});
+	console.time('load-uncompressed');
+	// const radar = new Level2Radar(data, { parseTypes: ['REF', 'VEL'] });
+	const radar = new Level2Radar(data);
+	console.timeEnd('load-uncompressed');
 	const reflectivity = radar.getHighresReflectivity();
-	const azimuth = radar.getAzimuth();
-
 	console.log(reflectivity);
-	console.log(azimuth);
-});
+
+	// load compressed file
+	const dataCompressed = await new Promise((resolve) => {
+		fs.readFile(fileToLoadCompressed, (err, fileData) => {
+			resolve(fileData);
+		});
+	});
+
+	console.time('load-compressed');
+	// const radarCompressed = new Level2Radar(dataCompressed, { parseTypes: ['REF', 'VEL'] });
+	const radarCompressed = new Level2Radar(dataCompressed);
+	console.timeEnd('load-compressed');
+	const reflectivityCompressed = radarCompressed.getHighresReflectivity();
+	console.log(reflectivityCompressed);
+})();

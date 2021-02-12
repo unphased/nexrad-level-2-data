@@ -1,34 +1,32 @@
-const fs = require('fs');
-const { BIG_ENDIAN } = require('../constants');
+const BIG_ENDIAN = 0;
+const LITTLE_ENDIAN = 1;
 
-/**
- * Implementation for loading a file into the buffer
- * and seeking/reading the data at specific offsets
- */
+// store a buffer or string and add functionality for random access
 class RandomAccessFile {
-	/**
-     * Returns a promise once the file has been
-     * loaded into the buffer
-     */
-	constructor(file) {
+	constructor(file, endian = BIG_ENDIAN) {
 		this.offset = 0;
 		this.buffer = null;
-		this.bigEndian = false;
 
-		// load a file if a string was provided
+		// set the binary endian order
+		if (endian < 0) return;
+		this.bigEndian = (endian === BIG_ENDIAN);
+
+		// string to buffer if string was provided
 		if (typeof file === 'string') {
-			return new Promise((resolve) => {
-				this.loadFile(file).then((data) => {
-					this.buffer = Buffer.from(data, 'binary');
-					resolve(this);
-				});
-			});
-		}
-		// load the buffer directly and return a promise for consistency
-		return new Promise((resolve) => {
+			this.buffer = Buffer.from(file, 'binary');
+		} else {
+			// load the buffer directly
 			this.buffer = file;
-			resolve(this);
-		});
+		}
+
+		// set up local read functions so we don't constantly query endianess
+		if (this.bigEndian) {
+			this.readFloatLocal = this.buffer.readFloatBE.bind(this.buffer);
+			this.readIntLocal = this.buffer.readIntBE.bind(this.buffer);
+		}	else {
+			this.readFloatLocal = this.buffer.readFloatLE.bind(this.buffer);
+			this.readIntLocal = this.buffer.readIntLE.bind(this.buffer);
+		}
 	}
 
 	// return the current buffer length
@@ -41,24 +39,9 @@ class RandomAccessFile {
 		return this.offset;
 	}
 
-	// load the file into the buffer
-	static loadFile(file) {
-		return new Promise((resolve) => {
-			fs.readFile(file, (error, data) => {
-				resolve(data);
-			});
-		});
-	}
-
 	// seek to a provided buffer offset
 	seek(byte) {
 		this.offset = byte;
-	}
-
-	// set the binary endian order
-	endianOrder(endian) {
-		if (endian < 0) return;
-		this.bigEndian = (endian === BIG_ENDIAN);
 	}
 
 	// read a string from the buffer
@@ -70,7 +53,7 @@ class RandomAccessFile {
 
 	// read a float from the buffer
 	readFloat() {
-		const float = (this.bigEndian) ? this.buffer.readFloatBE(this.offset) : this.buffer.readFloatLE(this.offset);
+		const float = this.readFloatLocal(this.offset);
 		this.offset += 4;
 
 		return float;
@@ -78,7 +61,7 @@ class RandomAccessFile {
 
 	// read a number from the buffer
 	readInt() {
-		const int = (this.bigEndian) ? this.buffer.readIntBE(this.offset, 4) : this.buffer.readIntLE(this.offset, 4);
+		const int = this.readIntLocal(this.offset, 4);
 		this.offset += 4;
 
 		return int;
@@ -86,7 +69,7 @@ class RandomAccessFile {
 
 	// read a short from the buffer
 	readShort() {
-		const short = (this.bigEndian) ? this.buffer.readIntBE(this.offset, 2) : this.buffer.readIntLE(this.offset, 2);
+		const short = this.readIntLocal(this.offset, 2);
 		this.offset += 2;
 
 		return short;
@@ -118,3 +101,5 @@ class RandomAccessFile {
 }
 
 module.exports.RandomAccessFile = RandomAccessFile;
+module.exports.BIG_ENDIAN = BIG_ENDIAN;
+module.exports.LITTLE_ENDIAN = LITTLE_ENDIAN;
