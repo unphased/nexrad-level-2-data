@@ -1,4 +1,5 @@
 const { Level2Parser } = require('./Level2Parser');
+const { MESSAGE_HEADER_SIZE } = require('../constants');
 // parse message type 31
 module.exports = (raf, message, offset, options) => {
 	message.record = {
@@ -59,8 +60,8 @@ module.exports = (raf, message, offset, options) => {
 
 	// process remaining blocks if requested and if present
 	for (let i = 3; i < dbp.length; i += 1) {
-		if (options.parseTypes.includes(blockTypes[i])) {
-			message.record[blockTypesFriendly[blockTypes[i]]] = parseMomentData(raf, dbp[i], offset);
+		if (options.parseTypes.includes(blockTypes[i]) && dbp[i] < message.message_size) {
+			message.record[blockTypesFriendly[blockTypes[i]]] = parseMomentData(raf, dbp[i], offset, message.message_size);
 		}
 	}
 	return message;
@@ -135,7 +136,7 @@ const parseRadialData = (raf, record, dataBlockPointer, offset) => {
 	 * Object base on what type being parsed
 	 * See page 115-117; Section "Data Block #4-9" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
 	 */
-const parseMomentData = (raf, dataBlockPointer, offset) => {
+const parseMomentData = (raf, dataBlockPointer, offset, maxSize) => {
 	const parser = new Level2Parser(raf, dataBlockPointer, offset);
 	const data = {
 		gate_count: parser.getDataBlockShort(8),
@@ -146,7 +147,7 @@ const parseMomentData = (raf, dataBlockPointer, offset) => {
 		data_size: parser.getDataBlockByte(19),
 		scale: parser.getDataBlockFloat(20),
 		offset: parser.getDataBlockFloat(24),
-		data_offset: dataBlockPointer + 28,
+		data_offset: dataBlockPointer + MESSAGE_HEADER_SIZE,
 		moment_data: [],
 	};
 
@@ -158,9 +159,9 @@ const parseMomentData = (raf, dataBlockPointer, offset) => {
 		inc = 2;
 	}
 
-	const endI = 28 + data.gate_count * inc;
+	const endI = Math.min(MESSAGE_HEADER_SIZE + data.gate_count * inc, maxSize);
 
-	for (let i = 28; i <= endI; i += inc) {
+	for (let i = MESSAGE_HEADER_SIZE; i <= endI; i += inc) {
 		const val = getDataBlock(i);
 		// per documentation 0 = below threshold, 1 = range folding
 		if (val >= 2) {

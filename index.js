@@ -127,15 +127,15 @@ class Level2Radar {
 					 */
 		let r;
 		do {
-			// try {
-			r = new Level2Record(raf, recordNumber, messageOffset31, this.options);
-			recordNumber += 1;
-			// } catch (e) {
-			// 	// parsing error, report error then set this chunk as finished
-			// 	console.error('Message terminated early');
-			// 	console.error(e);
-			// 	r = { finished: true };
-			// }
+			try {
+				r = new Level2Record(raf, recordNumber, messageOffset31, this.options);
+				recordNumber += 1;
+			} catch (e) {
+				// parsing error, report error then set this chunk as finished
+				console.error('Message terminated early');
+				console.error(e);
+				r = { finished: true };
+			}
 
 			if (!r.finished) {
 				if (r.message_type === 31) {
