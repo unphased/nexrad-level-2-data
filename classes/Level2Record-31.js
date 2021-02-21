@@ -76,20 +76,22 @@ module.exports = (raf, message, offset, options) => {
 const parseVolumeData = (raf, dataBlockPointer, offset) => {
 	const parser = new Level2Parser(raf, dataBlockPointer, offset);
 	return {
-		block_type: parser.getDataBlockString(0, 1),
-		name: parser.getDataBlockString(1, 3),
-		size: parser.getDataBlockShort(4),
-		version_major: parser.getDataBlockByte(6),
-		version_minor: parser.getDataBlockByte(7),
-		latitude: parser.getDataBlockFloat(8),
-		longitude: parser.getDataBlockFloat(12),
-		elevation: parser.getDataBlockShort(16),
-		feedhorn_height: parser.getDataBlockByte(18),
-		calibration: parser.getDataBlockFloat(20),
-		tx_horizontal: parser.getDataBlockFloat(24),
-		tx_vertical: parser.getDataBlockFloat(28),
-		differential_reflectivity: parser.getDataBlockFloat(32),
-		volume_coverage_pattern: parser.getDataBlockShort(40),
+		block_type: parser.getDataBlockString(1),
+		name: parser.getDataBlockString(3),
+		size: parser.getDataBlockShort(),
+		version_major: parser.getDataBlockByte(),
+		version_minor: parser.getDataBlockByte(),
+		latitude: parser.getDataBlockFloat(),
+		longitude: parser.getDataBlockFloat(),
+		elevation: parser.getDataBlockShort(),
+		feedhorn_height: parser.getDataBlockShort(),
+		calibration: parser.getDataBlockFloat(),
+		tx_horizontal: parser.getDataBlockFloat(),
+		tx_vertical: parser.getDataBlockFloat(),
+		differential_reflectivity: parser.getDataBlockFloat(),
+		differential_phase: parser.getDataBlockFloat(),
+		volume_coverage_pattern: parser.getDataBlockShort(),
+		spare: parser.getDataBlockShort(),
 	};
 };
 
@@ -102,11 +104,11 @@ const parseVolumeData = (raf, dataBlockPointer, offset) => {
 const parseElevationData = (raf, record, dataBlockPointer, offset) => {
 	const parser = new Level2Parser(raf, dataBlockPointer, offset);
 	return {
-		block_type: parser.getDataBlockString(0, 1),
-		name: parser.getDataBlockString(1, 3),
-		size: parser.getDataBlockShort(4),
-		atmos: parser.getDataBlockShort(6),
-		calibration: parser.getDataBlockFloat(8),
+		block_type: parser.getDataBlockString(1),
+		name: parser.getDataBlockString(3),
+		size: parser.getDataBlockShort(),
+		atmos: parser.getDataBlockShort(),
+		calibration: parser.getDataBlockFloat(),
 	};
 };
 
@@ -119,13 +121,16 @@ const parseElevationData = (raf, record, dataBlockPointer, offset) => {
 const parseRadialData = (raf, record, dataBlockPointer, offset) => {
 	const parser = new Level2Parser(raf, dataBlockPointer, offset);
 	return {
-		block_type: parser.getDataBlockString(0, 1),
-		name: parser.getDataBlockString(1, 3),
-		size: parser.getDataBlockShort(4),
-		unambiguous_range: parser.getDataBlockShort(6),
-		horizontal_noise_level: parser.getDataBlockFloat(8),
-		vertical_noise_level: parser.getDataBlockFloat(12),
-		nyquist_velocity: parser.getDataBlockShort(16),
+		block_type: parser.getDataBlockString(1),
+		name: parser.getDataBlockString(3),
+		size: parser.getDataBlockShort(),
+		unambiguous_range: parser.getDataBlockShort() / 10,
+		horizontal_noise_level: parser.getDataBlockFloat(),
+		vertical_noise_level: parser.getDataBlockFloat(),
+		nyquist_velocity: parser.getDataBlockShort(),
+		radial_flags: parser.getDataBlockShort(),
+		horizontal_calibration: parser.getDataBlockFloat(),
+		vertical_calibration: parser.getDataBlockFloat(),
 	};
 };
 
@@ -138,15 +143,20 @@ const parseRadialData = (raf, record, dataBlockPointer, offset) => {
 	 */
 const parseMomentData = (raf, dataBlockPointer, offset, maxSize) => {
 	const parser = new Level2Parser(raf, dataBlockPointer, offset);
+	// initial offset for moment data
 	const data = {
-		gate_count: parser.getDataBlockShort(8),
-		first_gate: parser.getDataBlockShort(10) / 1000, // scale int to float 0.001 precision
-		gate_size: parser.getDataBlockShort(12) / 1000, // scale int to float 0.001 precision
-		rf_threshold: parser.getDataBlockShort(14) / 10, // scale int to float 0.1 precision
-		snr_threshold: parser.getDataBlockShort(16) / 1000, // scale int to float 0.001 precision
-		data_size: parser.getDataBlockByte(19),
-		scale: parser.getDataBlockFloat(20),
-		offset: parser.getDataBlockFloat(24),
+		block_type: parser.getDataBlockString(1),
+		name: parser.getDataBlockString(3),
+		spare: parser.getDataBlockBytes(4),
+		gate_count: parser.getDataBlockShort(),
+		first_gate: parser.getDataBlockShort() / 1000, // scale int to float 0.001 precision
+		gate_size: parser.getDataBlockShort() / 1000, // scale int to float 0.001 precision
+		rf_threshold: parser.getDataBlockShort() / 10, // scale int to float 0.1 precision
+		snr_threshold: parser.getDataBlockShort() / 1000, // scale int to float 0.001 precision
+		control_flags: parser.getDataBlockByte(),
+		data_size: parser.getDataBlockByte(),
+		scale: parser.getDataBlockFloat(),
+		offset: parser.getDataBlockFloat(),
 		data_offset: dataBlockPointer + MESSAGE_HEADER_SIZE,
 		moment_data: [],
 	};
@@ -161,8 +171,9 @@ const parseMomentData = (raf, dataBlockPointer, offset, maxSize) => {
 
 	const endI = Math.min(MESSAGE_HEADER_SIZE + data.gate_count * inc, maxSize);
 
+	parser.seek(MESSAGE_HEADER_SIZE);
 	for (let i = MESSAGE_HEADER_SIZE; i <= endI; i += inc) {
-		const val = getDataBlock(i);
+		const val = getDataBlock();
 		// per documentation 0 = below threshold, 1 = range folding
 		if (val >= 2) {
 			data.moment_data.push((val - data.offset) / data.scale);

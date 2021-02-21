@@ -7,35 +7,36 @@ class Level2Parser {
 		this._record_offset = offset ?? null;
 
 		this.offset = this._dbp + this._record_offset + MESSAGE_HEADER_SIZE;
+		// reset raf to the begining of this record
+		this.seek(0);
 	}
 
-	getDataBlockByte(skip) {
-		this._raf.seek(this.offset + skip);
+	// all byte indexing operatrions are handled by the random access file
+	seek(offset) {
+		this._raf.seek(this.offset + offset);
+	}
+
+	getDataBlockByte() {
 		return this._raf.read();
 	}
 
-	getDataBlockInt(skip) {
-		this._raf.seek(this.offset + skip);
+	getDataBlockInt() {
 		return this._raf.readInt();
 	}
 
-	getDataBlockBytes(skip, size) {
-		this._raf.seek(this.offset + skip);
+	getDataBlockBytes(size) {
 		return this._raf.read(size);
 	}
 
-	getDataBlockShort(skip) {
-		this._raf.seek(this.offset + skip);
+	getDataBlockShort() {
 		return this._raf.readShort();
 	}
 
-	getDataBlockFloat(skip) {
-		this._raf.seek(this.offset + skip);
+	getDataBlockFloat() {
 		return this._raf.readFloat();
 	}
 
-	getDataBlockString(skip, size) {
-		this._raf.seek(this.offset + skip);
+	getDataBlockString(size) {
 		return this._raf.readString(size);
 	}
 }

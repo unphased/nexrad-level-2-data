@@ -94,7 +94,7 @@ class RandomAccessFile {
 		return data;
 	}
 
-	// skip a set number of bites and update the offset
+	// skip a set number of bytes and update the offset
 	skip(bytes) {
 		this.offset += bytes;
 	}
