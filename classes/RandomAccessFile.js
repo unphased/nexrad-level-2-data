@@ -22,10 +22,10 @@ class RandomAccessFile {
 		// set up local read functions so we don't constantly query endianess
 		if (this.bigEndian) {
 			this.readFloatLocal = this.buffer.readFloatBE.bind(this.buffer);
-			this.readIntLocal = this.buffer.readIntBE.bind(this.buffer);
+			this.readIntLocal = this.buffer.readUIntBE.bind(this.buffer);
 		}	else {
 			this.readFloatLocal = this.buffer.readFloatLE.bind(this.buffer);
-			this.readIntLocal = this.buffer.readIntLE.bind(this.buffer);
+			this.readIntLocal = this.buffer.readUIntLE.bind(this.buffer);
 		}
 	}
 
@@ -94,7 +94,7 @@ class RandomAccessFile {
 		return data;
 	}
 
-	// skip a set number of bites and update the offset
+	// skip a set number of bytes and update the offset
 	skip(bytes) {
 		this.offset += bytes;
 	}
