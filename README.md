@@ -148,14 +148,10 @@ Returns an Object of radar correlation coefficient data for the current **elevat
 }
 ```
 ## Known Issues
-1. RHO moment data parsing is not working
+
 
 ## ToDo
-* Add bZip data decompression for newer archives
-* Allow loading from tar files and web
 * Add non-highres reflection and velocity data
 
 ## License
 This work is based on the project of [Unidata](https://github.com/Unidata/thredds/blob/master/cdm/src/main/java/ucar/nc2/iosp/nexrad2/)
-
-MIT © Matt Johnston
