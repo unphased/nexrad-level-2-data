@@ -1,8 +1,8 @@
 const fs = require('fs');
-const { Level2Radar } = require('./index');
+const { Level2Radar } = require('./src/index');
 
-const fileToLoad = 'KTLX20130420_205120_V06'; // The radar archive file to load
-const fileToLoadCompressed = 'KLOT20200715_230602_V06'; // The radar archive file to load
+const fileToLoad = './data/KTLX20130420_205120_V06'; // The radar archive file to load
+const fileToLoadCompressed = './data/KLOT20200715_230602_V06'; // The radar archive file to load
 
 (async () => {
 	// load file into buffer

@@ -1,7 +1,7 @@
 const fs = require('fs');
-const { Level2Radar } = require('./index');
+const { Level2Radar } = require('./src/index');
 
-const fileToLoad = 'KLOT20200715_230602_V06'; // The radar archive file to load
+const fileToLoad = './data/KLOT20200715_230602_V06'; // The radar archive file to load
 
 Math.radians = (degrees) => degrees * Math.PI / 180;
 
