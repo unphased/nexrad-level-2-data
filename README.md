@@ -1,6 +1,6 @@
 # nexrad-level-2-data
 
-> A javascript implementation for decoding Nexrad Level II radar archive files. It currently does not support decoding bzip compressed radar data, or non-highres radar data. 
+> A javascript implementation for decoding Nexrad Level II radar archive files.
 
 You can find more information on how radar data is encoded at [NOAA](https://www.roc.noaa.gov/WSR88D/BuildInfo/Files.aspx) mainly in the document [ICD FOR RDA/RPG - Build RDA 19.0/RPG 19.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002T.pdf)
 
