@@ -74,6 +74,7 @@ module.exports = (raf, message, offset, options) => {
  * See page 114; Section "Data Block #1" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
  */
 const parseVolumeData = (raf, dataBlockPointer, offset) => {
+	console.log(offset);
 	const parser = new Level2Parser(raf, dataBlockPointer, offset);
 	return {
 		block_type: parser.getDataBlockString(1),
@@ -101,7 +102,7 @@ const parseVolumeData = (raf, dataBlockPointer, offset) => {
 	 * to the record.elevation Object
 	 * See page 114; Section "Data Block #2" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
 	 */
-const parseElevationData = (raf, record, dataBlockPointer, offset) => {
+const parseElevationData = (raf, dataBlockPointer, offset) => {
 	const parser = new Level2Parser(raf, dataBlockPointer, offset);
 	return {
 		block_type: parser.getDataBlockString(1),
@@ -118,7 +119,7 @@ const parseElevationData = (raf, record, dataBlockPointer, offset) => {
 	 * to the record.radial Object
 	 * See page 115; Section "Data Block #3" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
 	 */
-const parseRadialData = (raf, record, dataBlockPointer, offset) => {
+const parseRadialData = (raf, dataBlockPointer, offset) => {
 	const parser = new Level2Parser(raf, dataBlockPointer, offset);
 	return {
 		block_type: parser.getDataBlockString(1),

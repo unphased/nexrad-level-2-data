@@ -11,6 +11,7 @@ const parseMessage5 = require('./Level2Record-5-7');
  */
 class Level2Record {
 	constructor(raf, record, message31Offset, options) {
+		console.log(`31: ${message31Offset}`);
 		this._record_offset = record * RADAR_DATA_SIZE + FILE_HEADER_SIZE + message31Offset;
 		this.options = options;
 
@@ -35,6 +36,7 @@ class Level2Record {
 			segment_count: raf.readShort(),
 			segment_number: raf.readShort(),
 		};
+		console.log(`size: ${message.message_size}; message_type: ${message.message_type}`);
 
 		switch (message.message_type) {
 		case 31: return parseMessage31(raf, message, this._record_offset, this.options);

@@ -3,8 +3,18 @@ const { Level2Radar } = require('./src/index');
 
 const fileToLoad = './data/KTLX20130420_205120_V06'; // The radar archive file to load
 const fileToLoadCompressed = './data/KLOT20200715_230602_V06'; // The radar archive file to load
+const fileToLoadError = './data/messagesizeerror';
 
 (async () => {
+	// load file
+	const dataError = await new Promise((resolve) => {
+		fs.readFile(fileToLoadError, (err, fileData) => {
+			resolve(fileData);
+		});
+	});
+	const radarError = new Level2Radar(dataError);
+	console.log(radarError);
+
 	// load file into buffer
 	const data = await new Promise((resolve) => {
 		fs.readFile(fileToLoad, (err, fileData) => {
@@ -29,6 +39,7 @@ const fileToLoadCompressed = './data/KLOT20200715_230602_V06'; // The radar arch
 	// const radarCompressed = new Level2Radar(dataCompressed, { parseTypes: ['REF', 'VEL'] });
 	const radarCompressed = new Level2Radar(dataCompressed);
 	console.timeEnd('load-compressed');
+
 	const reflectivityCompressed = radarCompressed.getHighresReflectivity();
 	console.log(reflectivityCompressed);
 })();
