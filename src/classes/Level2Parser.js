@@ -39,6 +39,10 @@ class Level2Parser {
 	getDataBlockString(size) {
 		return this._raf.readString(size);
 	}
+
+	getPos() {
+		return this._raf.getPos();
+	}
 }
 
 module.exports.Level2Parser = Level2Parser;

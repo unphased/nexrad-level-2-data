@@ -22,7 +22,7 @@ const fileToLoadError = './data/messagesizeerror';
 		});
 	});
 	console.time('load-uncompressed');
-	// const radar = new Level2Radar(data, { parseTypes: ['REF', 'VEL'] });
+
 	const radar = new Level2Radar(data);
 	console.timeEnd('load-uncompressed');
 	const reflectivity = radar.getHighresReflectivity();

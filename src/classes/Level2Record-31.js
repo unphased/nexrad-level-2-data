@@ -1,7 +1,7 @@
 const { Level2Parser } = require('./Level2Parser');
 const { MESSAGE_HEADER_SIZE } = require('../constants');
 // parse message type 31
-module.exports = (raf, message, offset, options) => {
+module.exports = (raf, message, offset) => {
 	message.record = {
 		id: raf.readString(4),
 		mseconds: raf.readInt(),
@@ -37,33 +37,85 @@ module.exports = (raf, message, offset, options) => {
 	 * Parse all of our data inside the datablocks
 	 * and save it to the message.record Object
 	 */
-	// first three blocks are always present
-	message.record.volume = parseVolumeData(raf, dbp[0], offset);
-	message.record.elevation = parseElevationData(raf, dbp[1], offset);
-	message.record.radial = parseRadialData(raf, dbp[2], offset);
-
-	// block types in the order they are stored as data block pointers
-	const blockTypes = ['VOL', 'ELE', 'RAD', 'REF', 'VEL', 'SW', 'ZDR', 'PHI', 'RHO'];
 
 	// block type to friendly name conversion
 	const blockTypesFriendly = {
-		VOL: '',
-		ELE: '',
-		RAD: '',
+		VOL: 'volume',
+		ELE: 'elevation',
+		RAD: 'radial',
 		REF: 'reflect',
 		VEL: 'velocity',
-		SW: 'spectrum',
+		'SW ': 'spectrum',	// intentional space to fill 3-character requirement
 		ZDR: 'zdr',
 		PHI: 'phi',
 		RHO: 'rho',
 	};
 
-	// process remaining blocks if requested and if present
-	for (let i = 3; i < dbp.length; i += 1) {
-		if (options.parseTypes.includes(blockTypes[i]) && dbp[i] < message.message_size) {
-			message.record[blockTypesFriendly[blockTypes[i]]] = parseMomentData(raf, dbp[i], offset, message.message_size);
+	// convert halfwords to bytes for message size
+	const messageSizeBytes = message.message_size * 2;
+
+	let shift = 0;
+
+	// process blocks, the order of the blocks is not guaranteed so the name must be used to select proper parser
+	for (let i = 0; i < dbp.length; i += 1) {
+		// set up the parser
+		const parser = new Level2Parser(raf, dbp[i] - shift, offset);
+		const { name, type, err } = blockName(parser);
+
+		// if no name found move on to the next block by jumping directly to the next loop iteration
+		if (err) {
+			// there's a chance to recover if we can find a 'D' or 'R' after a string of zeros
+			// look for it and calculate a shift before moving on to the next iteration
+			// don't search on the last iteration of the loop (i)
+			if (type.charCodeAt(0) === 0 && i < (dbp.length - 1)) {
+				// start searching
+				console.log('Searching for next block');
+				let search = 0;
+				let found = false;
+				while (((dbp[i] + search) < dbp[i + 1]) && !found) {
+					const char = parser.getDataBlockString(1);
+					if (char === 'D' || char === 'R') {
+						found = true;
+						shift += (dbp[i + 1] - dbp[i] - search);
+					}
+					search += 1;
+				}
+				// next loop iteration if found
+				// eslint-disable-next-line no-continue
+				if (found) continue;
+				console.error('Unable to recover by searching');
+				return false;
+			}
+		}
+
+		// length check
+		if (dbp[i] < messageSizeBytes) {
+			// get the record based on known block names
+			let record = false;
+			switch (name) {
+			case 'VOL':
+				record = parseVolumeData(parser);
+				break;
+			case 'ELV':
+				record = parseElevationData(parser);
+				break;
+			case 'RAD':
+				record = parseRadialData(parser);
+				break;
+			default:
+				record = parseMomentData(parser);
+			}
+			// test for returned value
+			if (record && blockTypesFriendly[name]) {
+				// store the record under a friendly name
+				message.record[blockTypesFriendly[message.block_type]] = record;
+			}
+		} else {
+			console.error(`Block overruns file at ${raf.getPos()}`);
+			return false;
 		}
 	}
+	message.shift = shift;
 	return message;
 };
 
@@ -73,28 +125,24 @@ module.exports = (raf, message, offset, options) => {
  * to the record.volume Object
  * See page 114; Section "Data Block #1" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
  */
-const parseVolumeData = (raf, dataBlockPointer, offset) => {
-	console.log(offset);
-	const parser = new Level2Parser(raf, dataBlockPointer, offset);
-	return {
-		block_type: parser.getDataBlockString(1),
-		name: parser.getDataBlockString(3),
-		size: parser.getDataBlockShort(),
-		version_major: parser.getDataBlockByte(),
-		version_minor: parser.getDataBlockByte(),
-		latitude: parser.getDataBlockFloat(),
-		longitude: parser.getDataBlockFloat(),
-		elevation: parser.getDataBlockShort(),
-		feedhorn_height: parser.getDataBlockShort(),
-		calibration: parser.getDataBlockFloat(),
-		tx_horizontal: parser.getDataBlockFloat(),
-		tx_vertical: parser.getDataBlockFloat(),
-		differential_reflectivity: parser.getDataBlockFloat(),
-		differential_phase: parser.getDataBlockFloat(),
-		volume_coverage_pattern: parser.getDataBlockShort(),
-		spare: parser.getDataBlockShort(),
-	};
-};
+const parseVolumeData = (parser) => ({
+	block_type: parser.getDataBlockString(1),
+	name: parser.getDataBlockString(3),
+	size: parser.getDataBlockShort(),
+	version_major: parser.getDataBlockByte(),
+	version_minor: parser.getDataBlockByte(),
+	latitude: parser.getDataBlockFloat(),
+	longitude: parser.getDataBlockFloat(),
+	elevation: parser.getDataBlockShort(),
+	feedhorn_height: parser.getDataBlockShort(),
+	calibration: parser.getDataBlockFloat(),
+	tx_horizontal: parser.getDataBlockFloat(),
+	tx_vertical: parser.getDataBlockFloat(),
+	differential_reflectivity: parser.getDataBlockFloat(),
+	differential_phase: parser.getDataBlockFloat(),
+	volume_coverage_pattern: parser.getDataBlockShort(),
+	spare: parser.getDataBlockShort(),
+});
 
 /**
 	 * Creates a new parser and grabs the data
@@ -102,16 +150,13 @@ const parseVolumeData = (raf, dataBlockPointer, offset) => {
 	 * to the record.elevation Object
 	 * See page 114; Section "Data Block #2" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
 	 */
-const parseElevationData = (raf, dataBlockPointer, offset) => {
-	const parser = new Level2Parser(raf, dataBlockPointer, offset);
-	return {
-		block_type: parser.getDataBlockString(1),
-		name: parser.getDataBlockString(3),
-		size: parser.getDataBlockShort(),
-		atmos: parser.getDataBlockShort(),
-		calibration: parser.getDataBlockFloat(),
-	};
-};
+const parseElevationData = (parser) => ({
+	block_type: parser.getDataBlockString(1),
+	name: parser.getDataBlockString(3),
+	size: parser.getDataBlockShort(),
+	atmos: parser.getDataBlockShort(),
+	calibration: parser.getDataBlockFloat(),
+});
 
 /**
 	 * Creates a new parser and grabs the data
@@ -119,21 +164,18 @@ const parseElevationData = (raf, dataBlockPointer, offset) => {
 	 * to the record.radial Object
 	 * See page 115; Section "Data Block #3" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
 	 */
-const parseRadialData = (raf, dataBlockPointer, offset) => {
-	const parser = new Level2Parser(raf, dataBlockPointer, offset);
-	return {
-		block_type: parser.getDataBlockString(1),
-		name: parser.getDataBlockString(3),
-		size: parser.getDataBlockShort(),
-		unambiguous_range: parser.getDataBlockShort() / 10,
-		horizontal_noise_level: parser.getDataBlockFloat(),
-		vertical_noise_level: parser.getDataBlockFloat(),
-		nyquist_velocity: parser.getDataBlockShort(),
-		radial_flags: parser.getDataBlockShort(),
-		horizontal_calibration: parser.getDataBlockFloat(),
-		vertical_calibration: parser.getDataBlockFloat(),
-	};
-};
+const parseRadialData = (parser) => ({
+	block_type: parser.getDataBlockString(1),
+	name: parser.getDataBlockString(3),
+	size: parser.getDataBlockShort(),
+	unambiguous_range: parser.getDataBlockShort() / 10,
+	horizontal_noise_level: parser.getDataBlockFloat(),
+	vertical_noise_level: parser.getDataBlockFloat(),
+	nyquist_velocity: parser.getDataBlockShort(),
+	radial_flags: parser.getDataBlockShort(),
+	horizontal_calibration: parser.getDataBlockFloat(),
+	vertical_calibration: parser.getDataBlockFloat(),
+});
 
 /**
 	 * Creates a new parser and grabs the data
@@ -142,8 +184,7 @@ const parseRadialData = (raf, dataBlockPointer, offset) => {
 	 * Object base on what type being parsed
 	 * See page 115-117; Section "Data Block #4-9" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
 	 */
-const parseMomentData = (raf, dataBlockPointer, offset, maxSize) => {
-	const parser = new Level2Parser(raf, dataBlockPointer, offset);
+const parseMomentData = (parser) => {
 	// initial offset for moment data
 	const data = {
 		block_type: parser.getDataBlockString(1),
@@ -158,7 +199,6 @@ const parseMomentData = (raf, dataBlockPointer, offset, maxSize) => {
 		data_size: parser.getDataBlockByte(),
 		scale: parser.getDataBlockFloat(),
 		offset: parser.getDataBlockFloat(),
-		data_offset: dataBlockPointer + MESSAGE_HEADER_SIZE,
 		moment_data: [],
 	};
 
@@ -170,10 +210,10 @@ const parseMomentData = (raf, dataBlockPointer, offset, maxSize) => {
 		inc = 2;
 	}
 
-	const endI = Math.min(MESSAGE_HEADER_SIZE + data.gate_count * inc, maxSize);
+	const endI = data.gate_count * inc + MESSAGE_HEADER_SIZE;
 
 	parser.seek(MESSAGE_HEADER_SIZE);
-	for (let i = MESSAGE_HEADER_SIZE; i <= endI; i += inc) {
+	for (let i = MESSAGE_HEADER_SIZE; i < endI; i += inc) {
 		const val = getDataBlock();
 		// per documentation 0 = below threshold, 1 = range folding
 		if (val >= 2) {
@@ -182,6 +222,26 @@ const parseMomentData = (raf, dataBlockPointer, offset, maxSize) => {
 			data.moment_data.push(null);
 		}
 	}
-
 	return data;
+};
+
+// return the block name and return the pointer to the begining of the block
+// return false if "D" is not present at byte 0
+const blockName = (parser) => {
+	// get data
+	const type = parser.getDataBlockString(1);
+	const name = parser.getDataBlockString(3);
+
+	// skip back
+	parser.seek(0);
+
+	// basic data integrity check
+	if (!(type === 'D' || type === 'R')) {
+		console.error(`Invalid data block type: 0x${type.charCodeAt(0).toString(16).padStart(2, '0')} at ${parser.getPos()}`);
+		return {
+			type,
+			err: true,
+		};
+	}
+	return { name, type };
 };

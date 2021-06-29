@@ -13,7 +13,7 @@ Math.radians = (degrees) => degrees * Math.PI / 180;
 		});
 	});
 	console.time('load');
-	// const radar = new Level2Radar(data, { parseTypes: ['REF', 'VEL'] });
+
 	const radar = new Level2Radar(data);
 	console.timeEnd('load');
 	const reflectivity = radar.getHighresReflectivity();

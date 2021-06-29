@@ -84,7 +84,7 @@ class RandomAccessFile {
 	read(bytes = 1) {
 		let data = null;
 		if (bytes > 1) {
-			data = this.buffer.slice(this.offset, bytes);
+			data = this.buffer.slice(this.offset, this.offset + bytes);
 			this.offset += bytes;
 		} else {
 			data = this.buffer[this.offset];

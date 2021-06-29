@@ -43,7 +43,7 @@ Returns an Object of radar reflectivity data for the current **elevation** and *
 
 ``` javascript
 { 
-  	gate_count: Number,
+  gate_count: Number,
 	first_gate: Number,
 	gate_size: Number,
 	rf_threshold: Number,
@@ -60,7 +60,7 @@ Returns an Object of radar velocity data for the current **elevation** and **sca
 
 ``` javascript
 { 
-  	gate_count: Number,
+  gate_count: Number,
 	first_gate: Number,
 	gate_size: Number,
 	rf_threshold: Number,
@@ -77,7 +77,7 @@ Returns an Object of radar spectrum data for the current **elevation** and **sca
 
 ``` javascript
 { 
-  	gate_count: Number,
+  gate_count: Number,
 	first_gate: Number,
 	gate_size: Number,
 	rf_threshold: Number,
@@ -94,7 +94,7 @@ Returns an Object of radar diff reflectivity data for the current **elevation** 
 
 ``` javascript
 { 
-  	gate_count: Number,
+  gate_count: Number,
 	first_gate: Number,
 	gate_size: Number,
 	rf_threshold: Number,
@@ -111,7 +111,7 @@ Returns an Object of radar diff phase data for the current **elevation** and **s
 
 ``` javascript
 { 
-  	gate_count: Number,
+  gate_count: Number,
 	first_gate: Number,
 	gate_size: Number,
 	rf_threshold: Number,
@@ -128,7 +128,7 @@ Returns an Object of radar correlation coefficient data for the current **elevat
 
 ``` javascript
 { 
-  	gate_count: Number,
+  gate_count: Number,
 	first_gate: Number,
 	gate_size: Number,
 	rf_threshold: Number,

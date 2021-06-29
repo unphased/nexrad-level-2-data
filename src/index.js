@@ -1,10 +1,7 @@
 const { RandomAccessFile, BIG_ENDIAN } = require('./classes/RandomAccessFile');
 const { Level2Record } = require('./classes/Level2Record');
-const { FILE_HEADER_SIZE } = require('./constants');
+const { FILE_HEADER_SIZE, RADAR_DATA_SIZE } = require('./constants');
 const decompress = require('./decompress');
-
-// defaults
-const PARSE_TYPES = ['REF', 'VEL', 'SW', 'ZDR', 'PHI', 'RHO'];
 
 class Level2Radar {
 	constructor(file, options) {
@@ -12,7 +9,7 @@ class Level2Radar {
 		this.scan = 0;
 		// options and defaults
 		this.options = {
-			parseTypes: options?.parseTypes ?? PARSE_TYPES,
+			...options,
 		};
 		this.parseData(file);
 	}
@@ -140,7 +137,7 @@ class Level2Radar {
 			if (!r.finished) {
 				if (r.message_type === 31) {
 					// found a message 31 type, update the offset
-					messageOffset31 += (r.message_size * 2 + 12 - 2432);
+					messageOffset31 += (r.message_size * 2 + 12 - RADAR_DATA_SIZE - r.shift);
 				}
 
 				// only process specific message types
