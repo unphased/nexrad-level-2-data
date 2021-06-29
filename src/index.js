@@ -137,7 +137,7 @@ class Level2Radar {
 			if (!r.finished) {
 				if (r.message_type === 31) {
 					// found a message 31 type, update the offset
-					messageOffset31 += (r.message_size * 2 + 12 - RADAR_DATA_SIZE - r.shift);
+					messageOffset31 += (r.message_size * 2 + 12 - RADAR_DATA_SIZE);
 				}
 
 				// only process specific message types

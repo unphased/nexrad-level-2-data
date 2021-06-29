@@ -21,6 +21,15 @@ module.exports = (raf, message, offset) => {
 		dcount: raf.readShort(),
 	};
 
+	// basic data integrity check
+	try {
+		if (!message.record.id.match(/[A-Z]{4}/)) throw new Error(`Invalid record id: ${message.record.id}`);
+		if (message.record.mseconds > 86401000) throw new Error(`Invalid timestamp (ms): ${message.record.mseconds}`); // account for leap second
+	} catch (e) {
+		console.error(e.message);
+		return false;
+	}
+
 	/**
 	 * Read and save the data pointers from the file
 	 * so we know where to start reading within the file
@@ -54,68 +63,43 @@ module.exports = (raf, message, offset) => {
 	// convert halfwords to bytes for message size
 	const messageSizeBytes = message.message_size * 2;
 
-	let shift = 0;
-
 	// process blocks, the order of the blocks is not guaranteed so the name must be used to select proper parser
 	for (let i = 0; i < dbp.length; i += 1) {
 		// set up the parser
-		const parser = new Level2Parser(raf, dbp[i] - shift, offset);
-		const { name, type, err } = blockName(parser);
+		const parser = new Level2Parser(raf, dbp[i], offset);
+		try {
+			const { name } = blockName(parser);
 
-		// if no name found move on to the next block by jumping directly to the next loop iteration
-		if (err) {
-			// there's a chance to recover if we can find a 'D' or 'R' after a string of zeros
-			// look for it and calculate a shift before moving on to the next iteration
-			// don't search on the last iteration of the loop (i)
-			if (type.charCodeAt(0) === 0 && i < (dbp.length - 1)) {
-				// start searching
-				console.log('Searching for next block');
-				let search = 0;
-				let found = false;
-				while (((dbp[i] + search) < dbp[i + 1]) && !found) {
-					const char = parser.getDataBlockString(1);
-					if (char === 'D' || char === 'R') {
-						found = true;
-						shift += (dbp[i + 1] - dbp[i] - search);
-					}
-					search += 1;
-				}
-				// next loop iteration if found
-				// eslint-disable-next-line no-continue
-				if (found) continue;
-				console.error('Unable to recover by searching');
-				return false;
-			}
-		}
-
-		// length check
-		if (dbp[i] < messageSizeBytes) {
+			// length check
+			if (dbp[i] < messageSizeBytes) {
 			// get the record based on known block names
-			let record = false;
-			switch (name) {
-			case 'VOL':
-				record = parseVolumeData(parser);
-				break;
-			case 'ELV':
-				record = parseElevationData(parser);
-				break;
-			case 'RAD':
-				record = parseRadialData(parser);
-				break;
-			default:
-				record = parseMomentData(parser);
-			}
-			// test for returned value
-			if (record && blockTypesFriendly[name]) {
+				let record = false;
+				switch (name) {
+				case 'VOL':
+					record = parseVolumeData(parser);
+					break;
+				case 'ELV':
+					record = parseElevationData(parser);
+					break;
+				case 'RAD':
+					record = parseRadialData(parser);
+					break;
+				default:
+					record = parseMomentData(parser);
+				}
+				// test for returned value
+				if (record && blockTypesFriendly[name]) {
 				// store the record under a friendly name
-				message.record[blockTypesFriendly[message.block_type]] = record;
+					message.record[blockTypesFriendly[record.name]] = record;
+				}
+			} else {
+				throw new Error(`Block overruns file at ${raf.getPos()}`);
 			}
-		} else {
-			console.error(`Block overruns file at ${raf.getPos()}`);
-			return false;
+		} catch (e) {
+			console.log(e.message);
 		}
 	}
-	message.shift = shift;
+
 	return message;
 };
 
@@ -237,11 +221,7 @@ const blockName = (parser) => {
 
 	// basic data integrity check
 	if (!(type === 'D' || type === 'R')) {
-		console.error(`Invalid data block type: 0x${type.charCodeAt(0).toString(16).padStart(2, '0')} at ${parser.getPos()}`);
-		return {
-			type,
-			err: true,
-		};
+		throw new Error(`Invalid data block type: 0x${(type.charCodeAt(0) || 0).toString(16).padStart(2, '0')} at ${parser.getPos()}`);
 	}
 	return { name, type };
 };
