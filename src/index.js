@@ -143,12 +143,12 @@ class Level2Radar {
 				// only process specific message types
 				if ([1, 5, 7, 31].includes(r.message_type)) {
 					// If data is found, push the record to the data array
-					if (r.record.reflect
-								|| r.record.velocity
-								|| r.record.spectrum
-								|| r.record.zdr
-								|| r.record.phi
-								|| r.record.rho) data.push(r);
+					if (r?.record?.reflect
+								|| r?.record?.velocity
+								|| r?.record?.spectrum
+								|| r?.record?.zdr
+								|| r?.record?.phi
+								|| r?.record?.rho) data.push(r);
 
 					if ([5, 7].includes(r.message_type)) this.vcp = r;
 				}

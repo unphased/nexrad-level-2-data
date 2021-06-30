@@ -2,7 +2,7 @@ const { Level2Parser } = require('./Level2Parser');
 const { MESSAGE_HEADER_SIZE } = require('../constants');
 // parse message type 31
 module.exports = (raf, message, offset) => {
-	message.record = {
+	const record = {
 		id: raf.readString(4),
 		mseconds: raf.readInt(),
 		julian_date: raf.readShort(),
@@ -23,12 +23,14 @@ module.exports = (raf, message, offset) => {
 
 	// basic data integrity check
 	try {
-		if (!message.record.id.match(/[A-Z]{4}/)) throw new Error(`Invalid record id: ${message.record.id}`);
-		if (message.record.mseconds > 86401000) throw new Error(`Invalid timestamp (ms): ${message.record.mseconds}`); // account for leap second
+		if (!record.id.match(/[A-Z]{4}/)) throw new Error(`Invalid record id: ${record.id}`);
+		if (record.mseconds > 86401000) throw new Error(`Invalid timestamp (ms): ${record.mseconds}`); // account for leap second
 	} catch (e) {
+		// return the un-altered message
 		console.error(e.message);
-		return false;
+		return message;
 	}
+	message.record = record;
 
 	/**
 	 * Read and save the data pointers from the file

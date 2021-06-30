@@ -35,7 +35,7 @@ class Level2Record {
 			segment_count: raf.readShort(),
 			segment_number: raf.readShort(),
 		};
-
+		console.log(message);
 		switch (message.message_type) {
 		case 31: return parseMessage31(raf, message, this._record_offset, this.options);
 		case 1: return parseMessage1(raf, message);
