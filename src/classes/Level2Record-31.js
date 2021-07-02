@@ -69,6 +69,7 @@ module.exports = (raf, message, offset) => {
 	for (let i = 0; i < dbp.length; i += 1) {
 		// set up the parser
 		const parser = new Level2Parser(raf, dbp[i], offset);
+		console.log(`raf position: ${parser.getPos()}`);
 		try {
 			const { name } = blockName(parser);
 
