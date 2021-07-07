@@ -26,3 +26,8 @@ if theres an error discard the previous block and go back to the last known good
 		rsbs: raf.readByte(),
 		aim: raf.readByte(),
 		dcount: raf.readShort(),
+
+		best option appears to be searching for:
+		julian date (2 bytes), known value, or known value plus 1
+		message mseconds (4 bytes), don't care
+		segment count and number = 0x0001 0x0001

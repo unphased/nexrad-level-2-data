@@ -1,5 +1,6 @@
 const { Level2Parser } = require('./Level2Parser');
 const { MESSAGE_HEADER_SIZE } = require('../constants');
+
 // parse message type 31
 module.exports = (raf, message, offset) => {
 	const record = {
@@ -65,42 +66,65 @@ module.exports = (raf, message, offset) => {
 	// convert halfwords to bytes for message size
 	const messageSizeBytes = message.message_size * 2;
 
+	// hold a previous data block until the next data block is verified as valid
+	let prevRecord = false;
+	let prevBlockStart = 0;
 	// process blocks, the order of the blocks is not guaranteed so the name must be used to select proper parser
 	for (let i = 0; i < dbp.length; i += 1) {
 		// set up the parser
 		const parser = new Level2Parser(raf, dbp[i], offset);
+		const parserStartPos = parser.getPos();
+
 		console.log(`raf position: ${parser.getPos()}`);
 		try {
 			const { name } = blockName(parser);
+			// no error was thrown, store the previous record
+			if (prevRecord && blockTypesFriendly[prevRecord.name]) {
+				// store the record under a friendly name
+				message.record[blockTypesFriendly[prevRecord.name]] = prevRecord;
+			}
+			// reset the previous record
+			prevRecord = false;
 
 			// length check
 			if (dbp[i] < messageSizeBytes) {
 			// get the record based on known block names
-				let record = false;
+				let thisRecord = false;
 				switch (name) {
 				case 'VOL':
-					record = parseVolumeData(parser);
+					thisRecord = parseVolumeData(parser);
 					break;
 				case 'ELV':
-					record = parseElevationData(parser);
+					thisRecord = parseElevationData(parser);
 					break;
 				case 'RAD':
-					record = parseRadialData(parser);
+					thisRecord = parseRadialData(parser);
 					break;
 				default:
-					record = parseMomentData(parser);
+					thisRecord = parseMomentData(parser);
 				}
-				// test for returned value
-				if (record && blockTypesFriendly[name]) {
-				// store the record under a friendly name
-					message.record[blockTypesFriendly[record.name]] = record;
-				}
+				// store returned value for validation checking on next block
+				prevRecord = thisRecord;
 			} else {
 				throw new Error(`Block overruns file at ${raf.getPos()}`);
 			}
+			// store the previous block position since this block was ok
+			prevBlockStart = parserStartPos;
 		} catch (e) {
 			console.log(e.message);
+			// clear out the previous record
+			prevRecord = false;
+
+			// set flag to search for next block
+			message.endedEarly = prevBlockStart;
+			break;
 		}
+	}
+
+	// we can't yet check the integrity of the last block so we'll just accept that it's correct for now
+	if (prevRecord && blockTypesFriendly[prevRecord.name]) {
+		// store the record under a friendly name
+		message.record[blockTypesFriendly[prevRecord.name]] = prevRecord;
 	}
 
 	return message;

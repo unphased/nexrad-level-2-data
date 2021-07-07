@@ -125,7 +125,7 @@ class Level2Radar {
 		let r;
 		do {
 			try {
-				r = new Level2Record(raf, recordNumber, messageOffset31, this.options);
+				r = new Level2Record(raf, recordNumber, messageOffset31, header, this.options);
 				recordNumber += 1;
 			} catch (e) {
 				// parsing error, report error then set this chunk as finished

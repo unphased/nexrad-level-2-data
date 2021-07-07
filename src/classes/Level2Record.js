@@ -6,11 +6,12 @@ const {
 const parseMessage1 = require('./Level2Record-1');
 const parseMessage31 = require('./Level2Record-31');
 const parseMessage5 = require('./Level2Record-5-7');
+const { level2RecordSearch } = require('./Level2RecordSearch');
 /**
  * Returns a record from the loaded radar data
  */
 class Level2Record {
-	constructor(raf, record, message31Offset, options) {
+	constructor(raf, record, message31Offset, header, options) {
 		this._record_offset = record * RADAR_DATA_SIZE + FILE_HEADER_SIZE + message31Offset;
 		this.options = options;
 
@@ -18,7 +19,15 @@ class Level2Record {
 		if (this._record_offset >= raf.getLength()) return { finished: true };
 
 		// return the current record data
-		return this.getRecord(raf);
+		const message = this.getRecord(raf);
+
+		// test for early termination flag
+		if (!message.endedEarly) return message;
+
+		// start a search for the next message
+		const nextRecordPos = level2RecordSearch(raf, message.endedEarly, header.modified_julian_date);
+		message.actualSize = nextRecordPos;
+		return message;
 	}
 
 	getRecord(raf) {
