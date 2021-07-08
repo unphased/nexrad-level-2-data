@@ -75,7 +75,7 @@ module.exports = (raf, message, offset) => {
 		const parser = new Level2Parser(raf, dbp[i], offset);
 		const parserStartPos = parser.getPos();
 
-		console.log(`raf position: ${parser.getPos()}`);
+		// console.log(`raf position: ${parser.getPos()}`);
 		try {
 			const { name } = blockName(parser);
 			// no error was thrown, store the previous record

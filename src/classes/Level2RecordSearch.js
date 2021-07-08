@@ -9,6 +9,7 @@ const level2RecordSearch = (raf, startPos, julianDate) => {
 	if (result) return result;
 
 	// try again with julian date + 1 in case this happened right at midnight
+	raf.seek(startPos);
 	return search(raf, julianDate + 1);
 };
 
@@ -27,9 +28,13 @@ const search = (raf, date) => {
 			// test the next 4 bytes for 0x0001 0x0001
 
 			if (raf.readShort() === 0x0001 && raf.readShort() === 0x0001) {
-				// found the next block calculate actual block length
-				console.log('found!!!!!!');
-				return 1;
+				// found a block!
+				// calculate the begining of the next block after the checks above including 6*2 bytes at the start of the header that we don't use for searching
+				const foundAt = raf.getPos() - skipBack - 6;
+
+				console.log(`Found next block at ${foundAt}`);
+				// return the actual block length
+				return foundAt;
 			}
 
 			raf.skip(-skipBack);
