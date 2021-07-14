@@ -26,6 +26,9 @@ class Level2Record {
 
 		// start a search for the next message
 		const nextRecordPos = level2RecordSearch(raf, message.endedEarly, header.modified_julian_date);
+		if (nextRecordPos === false) {
+			throw new Error(`Unable to recover message at ${this._record_offset}`);
+		}
 		message.actual_size = (nextRecordPos - this._record_offset) / 2 - CTM_HEADER_SIZE;
 		return message;
 	}

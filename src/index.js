@@ -129,7 +129,6 @@ class Level2Radar {
 				recordNumber += 1;
 			} catch (e) {
 				// parsing error, report error then set this chunk as finished
-				console.error('Message terminated early');
 				console.error(e);
 				r = { finished: true };
 			}
