@@ -5,6 +5,16 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
+			"name": "Test-Chunks",
+			"program": "${workspaceFolder}/test-chunks.js",
+			"request": "launch",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"type": "pwa-node",
+			// "outputCapture": "all",
+		},
+		{
 			"name": "Test-Error",
 			"program": "${workspaceFolder}/test-error.js",
 			"request": "launch",
