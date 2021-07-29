@@ -12,7 +12,11 @@ const { level2RecordSearch } = require('./Level2RecordSearch');
  */
 class Level2Record {
 	constructor(raf, record, message31Offset, header, options) {
-		this._record_offset = record * RADAR_DATA_SIZE + FILE_HEADER_SIZE + message31Offset;
+		// calculate header size if not provided (typically in chunks mode)
+		let headerSize = 0;
+		if (header) headerSize = FILE_HEADER_SIZE;
+
+		this._record_offset = record * RADAR_DATA_SIZE + headerSize + message31Offset;
 		this.options = options;
 
 		// passed the buffer, finished reading the file
@@ -25,7 +29,7 @@ class Level2Record {
 		if (!message.endedEarly) return message;
 
 		// start a search for the next message
-		const nextRecordPos = level2RecordSearch(raf, message.endedEarly, header.modified_julian_date);
+		const nextRecordPos = level2RecordSearch(raf, message.endedEarly, header?.modified_julian_date);
 		if (nextRecordPos === false) {
 			throw new Error(`Unable to recover message at ${this._record_offset}`);
 		}

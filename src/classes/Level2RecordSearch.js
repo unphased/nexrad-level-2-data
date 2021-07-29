@@ -1,6 +1,9 @@
 // attempt to search for the next message by looking for some known values
 
 const level2RecordSearch = (raf, startPos, julianDate) => {
+	// if julian date if provided (typically when processing chunks) a search cannot be performed
+	if (julianDate === undefined) return false;
+
 	// set up the raf at the start position
 	raf.seek(startPos);
 	// try searching with the provided julian date

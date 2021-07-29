@@ -10,17 +10,22 @@ const { RandomAccessFile, BIG_ENDIAN } = require('./classes/RandomAccessFile');
 const { FILE_HEADER_SIZE } = require('./constants');
 
 const decompress = (raf) => {
-	// skip file header
-	raf.seek(FILE_HEADER_SIZE);
-
+	let headerSize = 0;
 	// get the compression record
 	const compressionRecord = readCompressionHeader(raf);
 
 	// test for the magic number 'BZh' for a bzip compressed file
 	if (compressionRecord.header !== 'BZh') {
-		// not compressed, return the original file after resetting the pointer to zero
+		// not compressed, try again with after skipping the file header (first chunk or complete archive)
 		raf.seek(0);
-		return raf;
+		raf.skip(FILE_HEADER_SIZE);
+		headerSize = FILE_HEADER_SIZE;
+		const fullCompressionRecord = readCompressionHeader(raf);
+		if (fullCompressionRecord.header !== 'BZh') {
+			// not compressed in either form, return the original file at the begining
+			raf.seek(0);
+			return raf;
+		}
 	}
 	// compressed file, start decompressing
 	// the format is (int) size of block + 'BZh9' + compressed data block, repeat
@@ -42,8 +47,8 @@ const decompress = (raf) => {
 		raf.seek(raf.getPos() + size);
 	}
 
-	// reuse the original header
-	const outBuffers = [raf.buffer.slice(0, FILE_HEADER_SIZE)];
+	// reuse the original header if present
+	const outBuffers = [raf.buffer.slice(0, headerSize)];
 
 	// loop through each block and decompress it
 	positions.forEach((block) => {
