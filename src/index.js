@@ -3,7 +3,6 @@ const parseData = require('./parsedata');
 class Level2Radar {
 	constructor(file, options) {
 		this.elevation = 1;	// 1 based per NOAA documentation
-		this.scan = 0;
 		// options and defaults
 		this.options = {
 			...options,
@@ -16,14 +15,6 @@ class Level2Radar {
 
 	setElevation(elevation) {
 		this.elevation = elevation;
-	}
-
-	setScan(scan) {
-		this.scan = scan - 1;
-	}
-
-	setSweep(sweep) {
-		this.setScan(sweep);
 	}
 
 	getAzimuth(scan) {
@@ -58,19 +49,23 @@ class Level2Radar {
 			// return data
 			return this.data[this.elevation][scan].record.reflect;
 		}
-		return this.data[this.elevation].map((elev) => elev.record.reflect);
+		return this.data[this.elevation].map((i) => i.record.reflect);
 	}
 
 	// return message_header information
-	getHeader() {
+	getHeader(scan) {
 		// error checking
 		this._checkData();
 		if (this?.data?.[this.elevation] === undefined) throw new Error(`getHeader invalid elevation selected: ${this.elevation}`);
-		if (this?.data?.[this.elevation]?.[this.scan] === undefined) throw new Error(`getHeader invalid scan selected: ${this.scan}`);
-		if (this?.data?.[this.elevation]?.[this.scan]?.record === undefined) throw new Error(`getHeader no data for elevation: ${this.elevation}, scan: ${this.scan}`);
 
-		// return data
-		return this.data[this.elevation][this.scan].record;
+		if (scan !== undefined) {
+			if (this?.data?.[this.elevation]?.[scan] === undefined) throw new Error(`getHeader invalid scan selected: ${scan}`);
+			if (this?.data?.[this.elevation]?.[scan]?.record === undefined) throw new Error(`getHeader no data for elevation: ${this.elevation}, scan: ${scan}`);
+
+			// return data
+			return this.data[this.elevation][scan].record;
+		}
+		return this.data[this.elevation].map(((i) => i.record));
 	}
 
 	// return velocity data for the current elevation and scan
@@ -87,55 +82,71 @@ class Level2Radar {
 			// return data
 			return this.data[this.elevation][scan].record.velocity;
 		}
-		return this.data[this.elevation].map((elev) => elev.record.velocity);
+		return this.data[this.elevation].map((i) => i.record.velocity);
 	}
 
 	// return spectrum data for the current elevation and scan
-	getHighresSpectrum() {
+	getHighresSpectrum(scan) {
 		// error checking
 		this._checkData();
 		if (this?.data?.[this.elevation] === undefined) throw new Error(`getHighresSpectrum invalid elevation selected: ${this.elevation}`);
-		if (this?.data?.[this.elevation]?.[this.scan] === undefined) throw new Error(`getHighresSpectrum invalid scan selected: ${this.scan}`);
-		if (this?.data?.[this.elevation]?.[this.scan]?.record?.spectrum === undefined) throw new Error(`getHighresSpectrum no data for elevation: ${this.elevation}, scan: ${this.scan}`);
 
-		// return data
-		return this.data[this.elevation][this.scan].record.spectrum;
+		if (scan !== undefined) {
+			if (this?.data?.[this.elevation]?.[scan] === undefined) throw new Error(`getHighresSpectrum invalid scan selected: ${scan}`);
+			if (this?.data?.[this.elevation]?.[scan]?.record?.spectrum === undefined) throw new Error(`getHighresSpectrum no data for elevation: ${this.elevation}, scan: ${scan}`);
+
+			// return data
+			return this.data[this.elevation][scan].record.spectrum;
+		}
+		return this.data[this.elevation].map((i) => i.record.spectrum);
 	}
 
 	// return diff reflectivity data for the current elevation and scan
-	getHighresDiffReflectivity() {
+	getHighresDiffReflectivity(scan) {
 		// error checking
 		this._checkData();
 		if (this?.data?.[this.elevation] === undefined) throw new Error(`getHighresDiffReflectivity invalid elevation selected: ${this.elevation}`);
-		if (this?.data?.[this.elevation]?.[this.scan] === undefined) throw new Error(`getHighresDiffReflectivity invalid scan selected: ${this.scan}`);
-		if (this?.data?.[this.elevation]?.[this.scan]?.record?.zdr === undefined) throw new Error(`getHighresDiffReflectivity no data for elevation: ${this.elevation}, scan: ${this.scan}`);
 
-		// return data
-		return this.data[this.elevation][this.scan].record.zdr;
+		if (scan !== undefined) {
+			if (this?.data?.[this.elevation]?.[this.scan] === undefined) throw new Error(`getHighresDiffReflectivity invalid scan selected: ${this.scan}`);
+			if (this?.data?.[this.elevation]?.[this.scan]?.record?.zdr === undefined) throw new Error(`getHighresDiffReflectivity no data for elevation: ${this.elevation}, scan: ${this.scan}`);
+
+			// return data
+			return this.data[this.elevation][this.scan].record.zdr;
+		}
+		return this.data[this.elevation].map((i) => i.record.zdr);
 	}
 
 	// return diff phase data for the current elevation and scan
-	getHighresDiffPhase() {
+	getHighresDiffPhase(scan) {
 		// error checking
 		this._checkData();
 		if (this?.data?.[this.elevation] === undefined) throw new Error(`getHighresDiffPhase invalid elevation selected: ${this.elevation}`);
-		if (this?.data?.[this.elevation]?.[this.scan] === undefined) throw new Error(`getHighresDiffPhase invalid scan selected: ${this.scan}`);
-		if (this?.data?.[this.elevation]?.[this.scan]?.record?.phi === undefined) throw new Error(`getHighresDiffPhase no data for elevation: ${this.elevation}, scan: ${this.scan}`);
 
-		// return data
-		return this.data[this.elevation][this.scan].record.phi;
+		if (scan !== undefined) {
+			if (this?.data?.[this.elevation]?.[this.scan] === undefined) throw new Error(`getHighresDiffPhase invalid scan selected: ${this.scan}`);
+			if (this?.data?.[this.elevation]?.[this.scan]?.record?.phi === undefined) throw new Error(`getHighresDiffPhase no data for elevation: ${this.elevation}, scan: ${this.scan}`);
+
+			// return data
+			return this.data[this.elevation][this.scan].record.phi;
+		}
+		return this.data[this.elevation].map((i) => i.record.phi);
 	}
 
 	// return correlation coefficient data for the current elevation and scan
-	getHighresCorrelationCoefficient() {
+	getHighresCorrelationCoefficient(scan) {
 		// error checking
 		this._checkData();
 		if (this?.data?.[this.elevation] === undefined) throw new Error(`getHighresCorrelationCoefficient invalid elevation selected: ${this.elevation}`);
-		if (this?.data?.[this.elevation]?.[this.scan] === undefined) throw new Error(`getHighresCorrelationCoefficient invalid scan selected: ${this.scan}`);
-		if (this?.data?.[this.elevation]?.[this.scan]?.record?.rho === undefined) throw new Error(`getHighresCorrelationCoefficient no data for elevation: ${this.elevation}, scan: ${this.scan}`);
 
-		// return data
-		return this.data[this.elevation][this.scan].record.rho;
+		if (scan !== undefined) {
+			if (this?.data?.[this.elevation]?.[this.scan] === undefined) throw new Error(`getHighresCorrelationCoefficient invalid scan selected: ${this.scan}`);
+			if (this?.data?.[this.elevation]?.[this.scan]?.record?.rho === undefined) throw new Error(`getHighresCorrelationCoefficient no data for elevation: ${this.elevation}, scan: ${this.scan}`);
+
+			// return data
+			return this.data[this.elevation][this.scan].record.rho;
+		}
+		return this.data[this.elevation].map((i) => i.record.rho);
 	}
 
 	listElevations() {

@@ -36,7 +36,9 @@ files.forEach((fileToLoad) => {
 		radar.listElevations().forEach((elev) => {
 			radar.setElevation(elev);
 			const reflectivity = radar.getHighresReflectivity();
+			const cc = radar.getHighresCorrelationCoefficient();
 			console.log(reflectivity);
+			console.log(cc);
 		});
 	} catch (e) {
 		console.error('Error reading data');

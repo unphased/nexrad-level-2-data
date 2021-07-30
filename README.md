@@ -5,11 +5,23 @@
 You can find more information on how radar data is encoded at [NOAA](https://www.roc.noaa.gov/WSR88D/BuildInfo/Files.aspx) mainly in the document [ICD FOR RDA/RPG - Build RDA 19.0/RPG 19.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002T.pdf)
 
 ## Contents
+1. [Changes in v2.0.0](#changes)
 1. [Install](#install)
 1. [Usage](#usage)
 1. [API](#api)
 1. [Supported Messages](#supported-messages)
 1. [Acknowledgements](#acknowledgements)
+
+## Changes in v2.0.0
+
+v2.0.0 is a major overhaul of the parsing engine and has several breaking changes. See [UPGRADE.md](UPGRADE.md) for detailed breaking changes.
+
+- Allow for processing of "chunks" in addition to entire volume scan archives.
+	- Chunks (real time data) is provided by Unidata in the s3 bucket `s3://unidata-nexrad-level2-chunks/`
+	- Full archives are provided by Unidata in the s3 bucket `noaa-nexrad-level2`
+- Improve error reporting by throwing when data is not present or invalid elevations or scans are accessed.
+- Unify the data accessor functions (breaking change)
+- Follow NOAA convention of the lowest elevation being 1, and properly sort elevations above 1 into a sparse array (breaking change)
 
 ## Install
 
@@ -32,14 +44,8 @@ new Level2Radar(file_to_load).then(radar => {
 ### setElevation(Number elevation)
 Sets the elevation you want to grab the data from
 
-### setScan(Number scan)
-Sets the current scan you want to grab the data from
-
-### setSweep(Number sweep)
-Alias for **setScan**
-
-### getHighresReflectivity()
-Returns an Object of radar reflectivity data for the current **elevation** and **scan** in the following format
+### getHighresReflectivity([scan])
+Returns an Object of radar reflectivity data for the current **elevation** and **scan** (or all scans if not provided) in the following format
 
 ``` javascript
 { 
@@ -55,8 +61,8 @@ Returns an Object of radar reflectivity data for the current **elevation** and *
 }
 ```
 
-### getHighresVelocity()
-Returns an Object of radar velocity data for the current **elevation** and **scan** in the following format
+### getHighresVelocity([scan])
+Returns an Object of radar velocity data for the current **elevation** and **scan** (or all scans if not provided) in the following format
 
 ``` javascript
 { 
@@ -72,8 +78,8 @@ Returns an Object of radar velocity data for the current **elevation** and **sca
 }
 ```
 
-### getHighresSpectrum()
-Returns an Object of radar spectrum data for the current **elevation** and **scan** in the following format
+### getHighresSpectrum([scan])
+Returns an Object of radar spectrum data for the current **elevation** and **scan** (or all scans if not provided) in the following format
 
 ``` javascript
 { 
@@ -89,8 +95,8 @@ Returns an Object of radar spectrum data for the current **elevation** and **sca
 }
 ```
 
-### getHighresDiffReflectivity()
-Returns an Object of radar diff reflectivity data for the current **elevation** and **scan** in the following format
+### getHighresDiffReflectivity(scan)
+Returns an Object of radar diff reflectivity data for the current **elevation** and **scan** (or all scans if not provided) in the following format
 
 ``` javascript
 { 
@@ -106,8 +112,8 @@ Returns an Object of radar diff reflectivity data for the current **elevation** 
 }
 ```
 
-### getHighresDiffPhase()
-Returns an Object of radar diff phase data for the current **elevation** and **scan** in the following format
+### getHighresDiffPhase(scan)
+Returns an Object of radar diff phase data for the current **elevation** and **scan** (or all scans if not provided) in the following format
 
 ``` javascript
 { 
@@ -123,8 +129,8 @@ Returns an Object of radar diff phase data for the current **elevation** and **s
 }
 ```
 
-### getHighresCorrelationCoefficient()
-Returns an Object of radar correlation coefficient data for the current **elevation** and **scan** in the following format
+### getHighresCorrelationCoefficient(scan)
+Returns an Object of radar correlation coefficient data for the current **elevation** and **scan** (or all scans if not provided) in the following format
 
 ``` javascript
 { 
