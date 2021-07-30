@@ -33,8 +33,11 @@ files.forEach((fileToLoad) => {
 	}
 
 	try {
-		const reflectivity = radar.getHighresReflectivity();
-		console.log(reflectivity);
+		radar.listElevations().forEach((elev) => {
+			radar.setElevation(elev);
+			const reflectivity = radar.getHighresReflectivity();
+			console.log(reflectivity);
+		});
 	} catch (e) {
 		console.error('Error reading data');
 		console.error(e.stack);

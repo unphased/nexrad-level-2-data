@@ -138,6 +138,10 @@ class Level2Radar {
 		return this.data[this.elevation][this.scan].record.rho;
 	}
 
+	listElevations() {
+		return Object.keys(this.data).map((key) => +key);
+	}
+
 	_checkData() {
 		if (this.data.length === 0) throw new Error('No data found in file');
 	}
