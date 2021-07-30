@@ -1,4 +1,5 @@
 const parseData = require('./parsedata');
+const combineData = require('./combinedata');
 
 class Level2Radar {
 	constructor(file, options) {
@@ -155,6 +156,10 @@ class Level2Radar {
 
 	_checkData() {
 		if (this.data.length === 0) throw new Error('No data found in file');
+	}
+
+	static combineData(...args) {
+		return combineData(...args);
 	}
 }
 

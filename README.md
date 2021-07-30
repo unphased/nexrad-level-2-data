@@ -5,7 +5,7 @@
 You can find more information on how radar data is encoded at [NOAA](https://www.roc.noaa.gov/WSR88D/BuildInfo/Files.aspx) mainly in the document [ICD FOR RDA/RPG - Build RDA 19.0/RPG 19.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002T.pdf)
 
 ## Contents
-1. [Changes in v2.0.0](#changes)
+1. [Changes in v2.0.0](#changes-in-v200)
 1. [Install](#install)
 1. [Usage](#usage)
 1. [API](#api)
