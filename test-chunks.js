@@ -9,6 +9,8 @@ const { Level2Radar } = require('./src');
 
 const files = glob.sync('./data/chunks/230/*');
 
+const chunks = [];
+
 files.forEach((fileToLoad) => {
 	console.log(`**** ${fileToLoad}`);
 
@@ -25,20 +27,18 @@ files.forEach((fileToLoad) => {
 	let radar;
 	try {
 		radar = new Level2Radar(data);
-		console.log(radar);
 	} catch (e) {
 		console.error('Error parsing data');
 		console.error(e.stack);
 		return false;
 	}
 
+	chunks.push(radar);
+
 	try {
 		radar.listElevations().forEach((elev) => {
 			radar.setElevation(elev);
 			const reflectivity = radar.getHighresReflectivity();
-			const cc = radar.getHighresCorrelationCoefficient();
-			console.log(reflectivity);
-			console.log(cc);
 		});
 	} catch (e) {
 		console.error('Error reading data');
@@ -47,3 +47,5 @@ files.forEach((fileToLoad) => {
 	}
 	return true;
 });
+
+console.log(chunks);

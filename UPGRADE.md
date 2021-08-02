@@ -19,5 +19,18 @@ Scan is an optional parameter. If provided a specific scan index is returned, if
 Because all of the above functions can now be called with a specific scan the `setScan()` function has been removed. The alias `setSweep()` has also been removed.
 
 # Elevation indices
-Elevation indices used with `Level2Data.setElevation(<int>)` is now 1-based to follow the NOAA definition. The elevation array is sparse. A list of all available elevations is available from `Level2Data.listElevations()`. When first parsing the data the elevation is set to 1 by default, which may not contain data when processing chunks.
+Elevation indices used with `Level2Data.setElevation(<int>)` is now 1-based to follow the NOAA definition. The elevation array is sparse. A list of all available elevations is available from `Level2Data.listElevations()`. When first parsing the data the elevation is set to 1 by default, which may not contain data when processing chunks. `vcp.record.elevations` now matchesthe 1-based sparse array as well.
 
+# Empty data structures
+When processing chunks some data that is typically available in the first chunk may not be present. Specifically, you'll see one or more of the following empty data structures.
+```
+{
+	header: {},
+	vcp: {},
+}
+```
+The preferred method to use and parse this data is the nullish coalescing operator and related operators. With an empty header use the following code examples.
+```
+const ICAO = radar.header.ICAO ?? ''; // ICAO = '' (empty string)
+const ICAO = radar.header?.ICAO; // ICAO = undefined;
+```

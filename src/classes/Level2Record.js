@@ -14,7 +14,7 @@ class Level2Record {
 	constructor(raf, record, message31Offset, header, options) {
 		// calculate header size if not provided (typically in chunks mode)
 		let headerSize = 0;
-		if (header) headerSize = FILE_HEADER_SIZE;
+		if (header?.ICAO) headerSize = FILE_HEADER_SIZE;
 
 		this._record_offset = record * RADAR_DATA_SIZE + headerSize + message31Offset;
 		this.options = options;

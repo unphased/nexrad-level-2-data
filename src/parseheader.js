@@ -18,7 +18,7 @@ const parse = (raf) => {
 	}
 	// no header, skip to begining of file
 	raf.seek(0);
-	return false;
+	return {};
 };
 
 module.exports = parse;

@@ -18,7 +18,8 @@ module.exports = (raf, message) => {
 	// read each elevation
 	message.record.elevations = [];
 
-	for (let i = 0; i < message.record.num_elevations; i += 1) {
+	// because the NOAA spec is 1 based, a sparse array is used to match with elevation numbering in the .data section of the object
+	for (let i = 1; i <= message.record.num_elevations; i += 1) {
 		const elev = {
 			elevation_angle: parse360Angle(raf.readShort()),
 			channel_config: raf.readByte(),
@@ -46,7 +47,7 @@ module.exports = (raf, message) => {
 			prf_pulse_s3: raf.readShort(),
 			reserved: raf.readShort(),
 		};
-		message.record.elevations.push(elev);
+		message.record.elevations[i] = elev;
 	}
 
 	return message;

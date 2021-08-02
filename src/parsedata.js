@@ -34,7 +34,7 @@ const parseData = (file, options) => {
 				 * Save all the data we find to it's respective array
 				 */
 	let r;
-	let vcp = false;
+	let vcp = {};
 
 	do {
 		try {
