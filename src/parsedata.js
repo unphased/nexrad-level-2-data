@@ -35,6 +35,8 @@ const parseData = (file, options) => {
 				 */
 	let r;
 	let vcp = {};
+	let hasGaps = false;
+	let isTruncated = false;
 
 	do {
 		try {
@@ -43,6 +45,7 @@ const parseData = (file, options) => {
 		} catch (e) {
 			// parsing error, report error then set this chunk as finished
 			console.error(e);
+			isTruncated = true;
 			r = { finished: true };
 		}
 
@@ -50,6 +53,8 @@ const parseData = (file, options) => {
 			if (r.message_type === 31) {
 				// found a message 31 type, update the offset using an actual (from search) size if provided
 				const messageSize = r.actual_size ?? r.message_size;
+				// if actual_size is present set gaps flag
+				hasGaps = true;
 				messageOffset31 += (messageSize * 2 + 12 - RADAR_DATA_SIZE);
 			}
 
@@ -73,6 +78,8 @@ const parseData = (file, options) => {
 		data: groupAndSortScans(data),
 		header,
 		vcp,
+		isTruncated,
+		hasGaps,
 	};
 };
 

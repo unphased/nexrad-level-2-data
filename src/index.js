@@ -10,10 +10,14 @@ class Level2Radar {
 			this.options = {
 				...options,
 			};
-			const { data, header, vcp } = parseData(file, options);
+			const {
+				data, header, vcp, hasGaps, isTruncated,
+			} = parseData(file, options);
 			this.data = data;
 			this.header = header;
 			this.vcp = vcp;
+			this.hasGaps = hasGaps;
+			this.isTruncated = isTruncated;
 		} else if (typeof file === 'object' && (file.data && file.header && file.vcp)) {
 		// alternative mode data is fed in as a pre-formatted object as the result of the combine static function
 			this.data = file.data;
@@ -21,6 +25,8 @@ class Level2Radar {
 			this.header = file.header;
 			this.options = file.options;
 			this.vcp = file.vcp;
+			this.hasGaps = file.hasGaps;
+			this.isTruncated = file.isTruncated;
 		} else {
 			throw new Error('Unknown data provided');
 		}

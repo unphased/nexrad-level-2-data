@@ -9,6 +9,8 @@ You can find more information on how radar data is encoded at [NOAA](https://www
 1. [Install](#install)
 1. [Usage](#usage)
 1. [API](#api)
+1. [Testing](#testing)
+1. [Error Recovery and handling](#error-recovery-and-handling)
 1. [Supported Messages](#supported-messages)
 1. [Acknowledgements](#acknowledgements)
 
@@ -18,10 +20,12 @@ v2.0.0 is a major overhaul of the parsing engine and has several breaking change
 
 - Allow for processing of "chunks" in addition to entire volume scan archives.
 	- Chunks (real time data) is provided by Unidata in the s3 bucket `s3://unidata-nexrad-level2-chunks/`
-	- Full archives are provided by Unidata in the s3 bucket `noaa-nexrad-level2`
+	- Full archives are provided by Unidata in the s3 bucket `s3://noaa-nexrad-level2`
+	- When processing a chunk all data may not be populated in the resulting object. This is deatiled in [UPGRADE.md](UPGRADE.md)
 - Improve error reporting by throwing when data is not present or invalid elevations or scans are accessed.
 - Unify the data accessor functions (breaking change)
 - Follow NOAA convention of the lowest elevation being 1, and properly sort elevations above 1 into a sparse array (breaking change)
+- Provide a mechanism for consolidating data read from several chunks.
 
 ## Install
 
@@ -40,6 +44,14 @@ new Level2Radar(file_to_load).then(radar => {
 ```
 
 ## API
+
+### Constructor(file_to_load)
+Parses a Nexrad Level 2 Data archive or chunk. Provide `file_to_load` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 19.0/RPG 19.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002T.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data. These are detailed below.
+
+## Level2Data.combineData(data, [data, data], ...)
+Combines the data returned by multiple runs of the Level2Data constructor. This is typically used in "chunks" mode to combine all azimuths from one revolution into a single data set. `data` can be provided as an array of Level2Radar objects, individual Level2Data parameters or any combination thereof.
+
+The combine function blindly combines data and the right-most argument will overwrite any previously provided data. Individual azimuths located in `Level2Radar.data[]` will be appended. It is up to the calling routine to properly manage the parsing of related chunks and send it in to this routine.
 
 ### setElevation(Number elevation)
 Sets the elevation you want to grab the data from
@@ -145,11 +157,40 @@ Returns an Object of radar correlation coefficient data for the current **elevat
 	moment_data: Array
 }
 ```
+
+## Testing
+A formal testing suite is not provided. Several `test-*.js` are provided with matching data in the `./data` folder. These can be run individually as shown below.
+``` bash
+node test.js
+node test-chunks.js
+node test-error.js
+```
+The output of each test script is sent to the console.
+
+## Error recovery and handling
+This library will throw on many errors including:
+- Buffer not provided for parsing
+- Calling a data accessor on non-existant data such as invalid elevations or azimuths
+- A successfully parsed file that did not contain any data
+- A cursory check on data validity is done by checking the ICAO identifier of each record in the file before further parsing occurs.
+- Basic file length checks against offsets and block lengths listed in the file.
+The Nexrad archives and chunks do contain errors when read from the Unidata archives in s3 buckets `s3://noaa-nexrad-level2` and `s3://unidata-nexrad-level2-chunks/`. A very basic attempt is made to detect these errors, discard the affected record and find the begining of the next record. This does not always succeeded. The following are the possible outcomes:
+- Successful error detection and skipping to a known good block.
+	- Logs to console `Invlaid record id` or `Invalid block type`
+	- Returns as much data that could be parsed with some gaps in data. The actual gaps are not logged. A manual scan of the `Level2Radar.data[] arrays` looking at Azimuths would need to be performed to find the gaps in data. However any program calling this routine should be considering the `Level2Radar.data[].azimuth` data for further processing and thus should be unaffected.
+	- `Level2Data.hasGaps` is set to `true`
+- Error detection with no skipping to a known good block
+	- Logs to console `Invalid record id` or `Invalid block id`
+	- Later logs to console `Unable to recover message`
+	- Returns as much data that could be parsed.
+	- `Level2Data.isTruncated is set to `true`
+The script `test-error.js` can be run to test some of this functionality. It parses data in `./data/messagesizeerror`.
+
 ## Supported Messages
 Nexrad data is stored as message types. This package currently processes the following messages.
 |Message|Title|Description|
 |---|---|---|
-|1|Digital Radar Data|Reflectivity and velocity data. Replace. by message 31 in 2008 which supports a higher resolution.|
+|1|Digital Radar Data|Reflectivity and velocity data. Replaced by message 31 in 2008 which supports a higher resolution.|
 |5|Volume Coverage Pattern|Overview of the scanning paramaters|
 |7|Volume Coverage Pattern|Overview of the scanning paramaters|
 |31|Digital Radar Data Generic Format|Reflectivity and velocity data

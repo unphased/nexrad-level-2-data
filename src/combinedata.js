@@ -19,6 +19,8 @@ const combine = (...args) => {
 	rawData.forEach((raw) => {
 		// combine non-data elements
 		output.elevation = raw.elevation ?? output.elevation;
+		output.hasGaps = output.hasGaps || raw.hasGaps;
+		output.isTruncated = output.isTruncated || raw.isTruncated;
 		if (raw.options) output.options = { ...output.options, ...raw.options };
 		if (raw.vcp) output.vcp = { ...output.vcp, ...raw.vcp };
 		if (raw.header) output.header = { ...output.header, ...raw.header };
