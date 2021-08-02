@@ -34,18 +34,8 @@ files.forEach((fileToLoad) => {
 	}
 
 	chunks.push(radar);
-
-	try {
-		radar.listElevations().forEach((elev) => {
-			radar.setElevation(elev);
-			const reflectivity = radar.getHighresReflectivity();
-		});
-	} catch (e) {
-		console.error('Error reading data');
-		console.error(e.stack);
-		return false;
-	}
 	return true;
 });
+const full = Level2Radar.combineData(chunks);
 
-console.log(chunks);
+console.log(full);

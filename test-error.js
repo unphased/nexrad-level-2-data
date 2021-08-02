@@ -2,8 +2,8 @@ const fs = require('fs');
 const { Level2Radar } = require('./src/index');
 
 // these files should contain the same error
-const fileToLoadError = './data/messagesizeerror';
-// const fileToLoadError = 'data/KLOT20210625_075708_V06';
+// const fileToLoadError = './data/messagesizeerror';
+const fileToLoadError = 'data/KLOT20210625_075708_V06';
 
 (async () => {
 	// load file

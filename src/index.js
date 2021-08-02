@@ -4,14 +4,26 @@ const combineData = require('./combinedata');
 class Level2Radar {
 	constructor(file, options) {
 		this.elevation = 1;	// 1 based per NOAA documentation
+		// default mode, parse file from buffer
+		if (file instanceof Buffer) {
 		// options and defaults
-		this.options = {
-			...options,
-		};
-		const { data, header, vcp } = parseData(file, options);
-		this.data = data;
-		this.header = header;
-		this.vcp = vcp;
+			this.options = {
+				...options,
+			};
+			const { data, header, vcp } = parseData(file, options);
+			this.data = data;
+			this.header = header;
+			this.vcp = vcp;
+		} else if (typeof file === 'object' && (file.data && file.header && file.vcp)) {
+		// alternative mode data is fed in as a pre-formatted object as the result of the combine static function
+			this.data = file.data;
+			this.elevation = file.elevation;
+			this.header = file.header;
+			this.options = file.options;
+			this.vcp = file.vcp;
+		} else {
+			throw new Error('Unknown data provided');
+		}
 	}
 
 	setElevation(elevation) {
@@ -159,7 +171,10 @@ class Level2Radar {
 	}
 
 	static combineData(...args) {
-		return combineData(...args);
+		const data = combineData(args);
+
+		// pass through constructor alternative signature to get a Level2Object
+		return new Level2Radar(data);
 	}
 }
 

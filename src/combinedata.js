@@ -7,7 +7,7 @@
 
 const combine = (...args) => {
 	// create a single flat array
-	const rawData = args.flat();
+	const rawData = args.flat(50);
 
 	// empty object with structure
 	const output = {
