@@ -107,7 +107,7 @@ Returns an Object of radar spectrum data for the current **elevation** and **sca
 }
 ```
 
-### getHighresDiffReflectivity(scan)
+### getHighresDiffReflectivity([scan])
 Returns an Object of radar diff reflectivity data for the current **elevation** and **scan** (or all scans if not provided) in the following format
 
 ``` javascript
@@ -124,7 +124,7 @@ Returns an Object of radar diff reflectivity data for the current **elevation** 
 }
 ```
 
-### getHighresDiffPhase(scan)
+### getHighresDiffPhase([scan])
 Returns an Object of radar diff phase data for the current **elevation** and **scan** (or all scans if not provided) in the following format
 
 ``` javascript
@@ -141,7 +141,7 @@ Returns an Object of radar diff phase data for the current **elevation** and **s
 }
 ```
 
-### getHighresCorrelationCoefficient(scan)
+### getHighresCorrelationCoefficient([scan])
 Returns an Object of radar correlation coefficient data for the current **elevation** and **scan** (or all scans if not provided) in the following format
 
 ``` javascript
@@ -157,6 +157,11 @@ Returns an Object of radar correlation coefficient data for the current **elevat
 	moment_data: Array
 }
 ```
+
+### getAzimuth([scan])
+Returns an single azimuth value or array of azimuth values forthe current **elevation** and **scan** (or all scans if not provided). The order of azimuths in the returned array matches the order of the data in other get* functions above.
+
+
 
 ## Testing
 A formal testing suite is not provided. Several `test-*.js` are provided with matching data in the `./data` folder. These can be run individually as shown below.

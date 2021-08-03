@@ -38,14 +38,18 @@ class Level2Radar {
 
 	getAzimuth(scan) {
 		// error checking
-		if (scan === undefined) throw new Error('getAzimuth scan parameter not provided');
-		this._checkData();
 		if (this?.data?.[this.elevation] === undefined) throw new Error(`getAzimuth invalid elevation selected: ${this.elevation}`);
-		if (this?.data?.[this.elevation]?.[scan] === undefined) throw new Error(`getAzimuth invalid scan selected: ${scan}`);
-		if (this?.data?.[this.elevation]?.[scan]?.record?.azimuth === undefined) throw new Error(`getAzimuth no data for elevation: ${this.elevation}, scan: ${scan}`);
 
-		// return data
-		return this.data[this.elevation][scan].record.azimuth;
+		if (scan !== undefined) {
+			this._checkData();
+			if (this?.data?.[this.elevation] === undefined) throw new Error(`getAzimuth invalid elevation selected: ${this.elevation}`);
+			if (this?.data?.[this.elevation]?.[scan] === undefined) throw new Error(`getAzimuth invalid scan selected: ${scan}`);
+			if (this?.data?.[this.elevation]?.[scan]?.record?.azimuth === undefined) throw new Error(`getAzimuth no data for elevation: ${this.elevation}, scan: ${scan}`);
+
+			// return data
+			return this.data[this.elevation][scan].record.azimuth;
+		}
+		return this.data[this.elevation].map((i) => i.record.azimuth);
 	}
 
 	getScans() {

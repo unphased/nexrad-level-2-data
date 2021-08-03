@@ -9,6 +9,7 @@ The following functions have all been modified to provide a unified set of param
 - getHighresDiffReflectivity
 - getHighresDiffPhase
 - getHighresCorrelationCoefficient
+- getAzimuth
 The signature for these data accessors is now
 ```
 getHighresReflectivity([scan])
