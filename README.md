@@ -36,17 +36,20 @@ $ npm i nexrad-level-2-data
 ## Usage
 ``` javascript
 const { Level2Radar } = require('nexrad-level-2-data')
+const fs = require('fs');
 const file_to_load = "./data/KTLX20130420_205120_V06" // The radar archive file to load
 
-new Level2Radar(file_to_load).then(radar => {
+const rawData = fs.readFileSync(file_to_load);
+
+new Level2Radar(rawData).then(radar => {
     console.log(radar.getHighresReflectivity())
 })
 ```
 
 ## API
 
-### Constructor(file_to_load)
-Parses a Nexrad Level 2 Data archive or chunk. Provide `file_to_load` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 19.0/RPG 19.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002T.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data. These are detailed below.
+### Constructor(rawData)
+Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 19.0/RPG 19.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002T.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data in a format ready for processing. These are detailed below.
 
 ## Level2Data.combineData(data, [data, data], ...)
 Combines the data returned by multiple runs of the Level2Data constructor. This is typically used in "chunks" mode to combine all azimuths from one revolution into a single data set. `data` can be provided as an array of Level2Radar objects, individual Level2Data parameters or any combination thereof.
