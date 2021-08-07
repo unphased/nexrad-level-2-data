@@ -10,6 +10,8 @@ const { RandomAccessFile, BIG_ENDIAN } = require('./classes/RandomAccessFile');
 const { FILE_HEADER_SIZE } = require('./constants');
 
 const decompress = (raf) => {
+	// if file length is less than or equal to the file header size then it is not compressed
+	if (raf.getLength() <= FILE_HEADER_SIZE) return raf;
 	let headerSize = 0;
 	// get the compression record
 	const compressionRecord = readCompressionHeader(raf);
