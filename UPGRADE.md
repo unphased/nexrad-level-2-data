@@ -26,9 +26,9 @@ Elevation indices used with `Level2Data.setElevation(<int>)` is now 1-based to f
 When processing chunks some data that is typically available in the first chunk may not be present. Specifically, you'll see one or more of the following empty data structures.
 ```
 {
-	header: {},	// not present when chunk > 1
-	vcp: {},		// not present when chunk > 1
-	data: [],		// not present when chunk = 1
+	header: {},	// empty when chunk > 1
+	vcp: {},		// empty when chunk > 1
+	data: [],		// empty when chunk = 1
 }
 ```
 The preferred method to use and parse this data is the nullish coalescing operator and related operators. With an empty header use the following code examples.
