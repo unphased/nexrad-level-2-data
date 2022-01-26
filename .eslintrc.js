@@ -6,7 +6,7 @@ module.exports = {
 		node: true,
 		jquery: true,
 	},
-	extends: 'airbnb-base',
+	extends: ['airbnb-base', 'plugin:import/recommended'],
 	globals: {
 		Atomics: 'readonly',
 		SharedArrayBuffer: 'readonly',
@@ -32,7 +32,6 @@ module.exports = {
 			},
 		],
 		'no-tabs': 0,
-		'no-console': 0,
 		'max-len': 0,
 		'linebreak-style': 0,
 		quotes: [

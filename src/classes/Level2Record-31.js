@@ -2,7 +2,7 @@ const { Level2Parser } = require('./Level2Parser');
 const { MESSAGE_HEADER_SIZE } = require('../constants');
 
 // parse message type 31
-module.exports = (raf, message, offset) => {
+module.exports = (raf, message, offset, options) => {
 	const record = {
 		id: raf.readString(4),
 		mseconds: raf.readInt(),
@@ -28,7 +28,7 @@ module.exports = (raf, message, offset) => {
 		if (record.mseconds > 86401000) throw new Error(`Invalid timestamp (ms): ${record.mseconds}`); // account for leap second
 	} catch (e) {
 		// return the un-altered message
-		console.error(e.message);
+		options.logger.error(e.message);
 		return message;
 	}
 	message.record = record;
@@ -75,7 +75,6 @@ module.exports = (raf, message, offset) => {
 		const parser = new Level2Parser(raf, dbp[i], offset);
 		const parserStartPos = parser.getPos();
 
-		// console.log(`raf position: ${parser.getPos()}`);
 		try {
 			const { name } = blockName(parser);
 			// no error was thrown, store the previous record
@@ -111,7 +110,7 @@ module.exports = (raf, message, offset) => {
 			// store the previous block position since this block was ok
 			prevBlockStart = parserStartPos;
 		} catch (e) {
-			console.log(e.message);
+			options.logger.log(e.message);
 			// clear out the previous record
 			prevRecord = false;
 

@@ -2,17 +2,16 @@ const parseData = require('./parsedata');
 const combineData = require('./combinedata');
 
 class Level2Radar {
-	constructor(file, options) {
+	constructor(file, _options) {
+		// combine options with defaults
 		this.elevation = 1;	// 1 based per NOAA documentation
 		// default mode, parse file from buffer
 		if (file instanceof Buffer) {
 		// options and defaults
-			this.options = {
-				...options,
-			};
+			this.options = combineOptions(_options);
 			const {
 				data, header, vcp, hasGaps, isTruncated,
-			} = parseData(file, options);
+			} = parseData(file, this.options);
 			this.data = data;
 			this.header = header;
 			this.vcp = vcp;
@@ -187,5 +186,20 @@ class Level2Radar {
 		return new Level2Radar(data);
 	}
 }
+
+// combine options and defaults
+const combineOptions = (newOptions) => {
+	let logger = newOptions?.logger ?? console;
+	if (logger === false) logger = nullLogger;
+	return {
+		...newOptions, logger,
+	};
+};
+
+// null logger for options.logger = false
+const nullLogger = {
+	log: () => {},
+	error: () => {},
+};
 
 module.exports.Level2Radar = Level2Radar;

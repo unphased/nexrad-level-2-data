@@ -29,7 +29,7 @@ class Level2Record {
 		if (!message.endedEarly) return message;
 
 		// start a search for the next message
-		const nextRecordPos = level2RecordSearch(raf, message.endedEarly, header?.modified_julian_date);
+		const nextRecordPos = level2RecordSearch(raf, message.endedEarly, header?.modified_julian_date, this.options);
 		if (nextRecordPos === false) {
 			throw new Error(`Unable to recover message at ${this._record_offset}`);
 		}
@@ -53,7 +53,7 @@ class Level2Record {
 		};
 
 		switch (message.message_type) {
-		case 31: return parseMessage31(raf, message, this._record_offset, this.options);
+		case 31: return parseMessage31(raf, message, this._record_offset, this.options, this.options);
 		case 1: return parseMessage1(raf, message);
 		case 5:
 		case 7: return parseMessage5(raf, message);

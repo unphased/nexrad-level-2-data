@@ -48,8 +48,12 @@ new Level2Radar(rawData).then(radar => {
 
 ## API
 
-### Constructor(rawData)
+### Constructor(rawData, options)
 Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 19.0/RPG 19.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002T.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data in a format ready for processing. These are detailed below.
+
+|option|Description|
+|--|--|
+|options.logger|By default error and information messages will be written to the console. These can be supressed by passing false, or a custom logger can be provided. A custom logger must provide the ``log()`` and ``error()`` function.|
 
 ## Level2Data.combineData(data, [data, data], ...)
 Combines the data returned by multiple runs of the Level2Data constructor. This is typically used in "chunks" mode to combine all azimuths from one revolution into a single data set. `data` can be provided as an array of Level2Radar objects, individual Level2Data parameters or any combination thereof.

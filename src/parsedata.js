@@ -46,7 +46,7 @@ const parseData = (file, options) => {
 				recordNumber += 1;
 			} catch (e) {
 			// parsing error, report error then set this chunk as finished
-				console.error(e);
+				options.logger.error(e);
 				isTruncated = true;
 				r = { finished: true };
 			}

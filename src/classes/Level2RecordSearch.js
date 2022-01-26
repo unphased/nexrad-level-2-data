@@ -1,22 +1,22 @@
 // attempt to search for the next message by looking for some known values
 
-const level2RecordSearch = (raf, startPos, julianDate) => {
+const level2RecordSearch = (raf, startPos, julianDate, options) => {
 	// if julian date if provided (typically when processing chunks) a search cannot be performed
 	if (julianDate === undefined) return false;
 
 	// set up the raf at the start position
 	raf.seek(startPos);
 	// try searching with the provided julian date
-	const result = search(raf, julianDate);
+	const result = search(raf, julianDate, options);
 	// return the result if found
 	if (result) return result;
 
 	// try again with julian date + 1 in case this happened right at midnight
 	raf.seek(startPos);
-	return search(raf, julianDate + 1);
+	return search(raf, julianDate + 1, options);
 };
 
-const search = (raf, date) => {
+const search = (raf, date, options) => {
 	// calculate end of file after subtracting our search bytes
 	const endOfFile = raf.buffer.length - 10;
 	const found = false;
@@ -35,7 +35,7 @@ const search = (raf, date) => {
 				// calculate the begining of the next block after the checks above including 6*2 bytes at the start of the header that we don't use for searching
 				const foundAt = raf.getPos() - skipBack - 6;
 
-				console.log(`Found next block at ${foundAt}`);
+				options.logger.log(`Found next block at ${foundAt}`);
 				// return the actual block length
 				return foundAt;
 			}
