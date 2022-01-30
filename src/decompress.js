@@ -3,6 +3,9 @@
 // bzip
 const bzip = require('seek-bzip');
 
+// gzip
+const gzipDecompress = require('./gzipdecompress');
+
 // structured byte access
 const { RandomAccessFile, BIG_ENDIAN } = require('./classes/RandomAccessFile');
 
@@ -10,6 +13,11 @@ const { RandomAccessFile, BIG_ENDIAN } = require('./classes/RandomAccessFile');
 const { FILE_HEADER_SIZE } = require('./constants');
 
 const decompress = (raf) => {
+	// detect gzip header
+	const gZipHeader = raf.read(2);
+	raf.seek(0);
+	if (gZipHeader[0] === 31 && gZipHeader[1] === 139) return gzipDecompress(raf);
+
 	// if file length is less than or equal to the file header size then it is not compressed
 	if (raf.getLength() <= FILE_HEADER_SIZE) return raf;
 	let headerSize = 0;

@@ -4,7 +4,7 @@ const parse = (raf) => {
 	// check for fixed 'AR2V00' value
 	const identifier = raf.readString(6);
 
-	if (identifier === 'AR2V00') {
+	if (identifier === 'AR2V00' || identifier === 'ARCHIV') {
 		const header = {};
 		header.version = raf.readString(2);
 		raf.skip('.001'.length);
