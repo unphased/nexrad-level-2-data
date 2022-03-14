@@ -203,6 +203,7 @@ Nexrad data is stored as message types. This package currently processes the fol
 |Message|Title|Description|
 |---|---|---|
 |1|Digital Radar Data|Reflectivity and velocity data. Replaced by message 31 in 2008 which supports a higher resolution.|
+|2|RDA Status|
 |5|Volume Coverage Pattern|Overview of the scanning paramaters|
 |7|Volume Coverage Pattern|Overview of the scanning paramaters|
 |31|Digital Radar Data Generic Format|Reflectivity and velocity data
