@@ -23,9 +23,11 @@ class RandomAccessFile {
 		if (this.bigEndian) {
 			this.readFloatLocal = this.buffer.readFloatBE.bind(this.buffer);
 			this.readIntLocal = this.buffer.readUIntBE.bind(this.buffer);
+			this.readSignedIntLocal = this.buffer.readIntBE.bind(this.buffer);
 		}	else {
 			this.readFloatLocal = this.buffer.readFloatLE.bind(this.buffer);
 			this.readIntLocal = this.buffer.readUIntLE.bind(this.buffer);
+			this.readSignedIntLocal = this.buffer.readIntLE.bind(this.buffer);
 		}
 	}
 
@@ -70,6 +72,14 @@ class RandomAccessFile {
 	// read a short from the buffer
 	readShort() {
 		const short = this.readIntLocal(this.offset, 2);
+		this.offset += 2;
+
+		return short;
+	}
+
+	// read a signed int from the buffer
+	readSignedInt() {
+		const short = this.readSignedIntLocal(this.offset, 2);
 		this.offset += 2;
 
 		return short;

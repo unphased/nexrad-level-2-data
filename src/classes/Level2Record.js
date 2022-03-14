@@ -4,6 +4,7 @@ const {
 
 // message parsers
 const parseMessage1 = require('./Level2Record-1');
+const parseMessage2 = require('./Level2Record-2');
 const parseMessage31 = require('./Level2Record-31');
 const parseMessage5 = require('./Level2Record-5-7');
 const { level2RecordSearch } = require('./Level2RecordSearch');
@@ -53,8 +54,9 @@ class Level2Record {
 		};
 
 		switch (message.message_type) {
-		case 31: return parseMessage31(raf, message, this._record_offset, this.options, this.options);
-		case 1: return parseMessage1(raf, message);
+		case 31: return parseMessage31(raf, message, this._record_offset, this.options);
+		case 1: return parseMessage1(raf, message, this.options);
+		case 2: return parseMessage2(raf, message);
 		case 5:
 		case 7: return parseMessage5(raf, message);
 		default: return false;
