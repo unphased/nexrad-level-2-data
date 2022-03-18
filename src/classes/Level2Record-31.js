@@ -151,7 +151,8 @@ const parseVolumeData = (parser) => ({
 	differential_reflectivity: parser.getDataBlockFloat(),
 	differential_phase: parser.getDataBlockFloat(),
 	volume_coverage_pattern: parser.getDataBlockShort(),
-	spare: parser.getDataBlockShort(),
+	processing_status: parser.getDataBlockShort(),
+	zdr_bias_estimate: parser.getDataBlockShort(),
 });
 
 /**
