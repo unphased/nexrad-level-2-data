@@ -26,11 +26,13 @@ const combine = (...args) => {
 		if (raw.header) output.header = { ...output.header, ...raw.header };
 
 		// combine data elements
-		raw.listElevations().forEach((elev) => {
+		if (raw.data) {
+			raw.listElevations().forEach((elev) => {
 			// set up initial array
-			if (output.data[elev] === undefined) output.data[elev] = [];
-			output.data[elev].push(...raw.data[elev]);
-		});
+				if (output.data[elev] === undefined) output.data[elev] = [];
+				output.data[elev].push(...raw.data[elev]);
+			});
+		}
 	});
 
 	return output;
