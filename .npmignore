@@ -4,3 +4,4 @@ data
 test.js
 test*.js
 .eslint*
+docs

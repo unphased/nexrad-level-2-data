@@ -24,13 +24,13 @@ class Level2Radar {
 			this.data = data;
 
 			/**
-			 * @type Header
+			 * @type {Header}
 			 * @category Metadata
 			 */
 			this.header = header;
 
 			/**
-			 * @type Vcp
+			 * @type {Vcp}
 			 * @category Metadata
 			 */
 			this.vcp = vcp;
@@ -38,7 +38,7 @@ class Level2Radar {
 			/**
 			 * Gaps were found in the source data
 			 *
-			 * @type boolean
+			 * @type {boolean}
 			 * @category Metadata
 			 */
 
@@ -47,7 +47,7 @@ class Level2Radar {
 			/**
 			 * Source data was truncated
 			 *
-			 * @type boolean
+			 * @type {boolean}
 			 * @category Metadata
 			 */
 			this.isTruncated = isTruncated;

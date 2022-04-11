@@ -73,6 +73,8 @@ module.exports = {
 		'no-bitwise': 0,
 		'jsdoc/require-property-description': 0,
 		'jsdoc/require-returns-description': 0,
+		'jsdoc/no-undefined-types': 0,
+		// 'jsdoc/valid-types': 0,
 		'jsdoc/check-tag-names': ['error', {
 			definedTags: ['category'],
 		}],
