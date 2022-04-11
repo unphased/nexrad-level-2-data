@@ -45,7 +45,7 @@ const parseData = (file, options) => {
 	if (raf.getPos() < raf.getLength()) {
 		do {
 			try {
-				r = new Level2Record(raf, recordNumber, messageOffset31, header, options);
+				r = Level2Record(raf, recordNumber, messageOffset31, header, options);
 				recordNumber += 1;
 			} catch (e) {
 			// parsing error, report error then set this chunk as finished
