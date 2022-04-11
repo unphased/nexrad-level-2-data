@@ -438,7 +438,7 @@ parser options
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| [options.logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function. |
+| [logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function. |
 
 <a name="ParsedData"></a>
 
