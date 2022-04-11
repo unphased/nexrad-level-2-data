@@ -1,89 +1,10 @@
 const parseData = require('./parsedata');
 const combineData = require('./combinedata');
 
-/**
- *
- * @typedef {object} HighResData See NOAA documentation for detailed meanings of these values.
- * @property {number} gate_count
- * @property {number} gate_size
- * @property {number} first_gate
- * @property {number} rf_threshold
- * @property {number} snr_threshold
- * @property {number} scale
- * @property {number} offset
- * @property {string} block_type 'D'
- * @property {number} control_flags
- * @property {number} data_size
- * @property {string} name 'REF', 'VEL', 'SW ', 'ZDR', 'PHI', 'RHO'
- * @property {Buffer[]} spare Spare data per the documentation
- * @property {number[]} moment_data Scaled data
- */
-
-/**
- * @typedef {object} MessageHeader See NOAA documentation for detailed meanings of these values.
- * @property {number} aim
- * @property {number} ars
- * @property {number} compress_idx
- * @property {number} cut
- * @property {number} dcount
- * @property {number} elevation_angle
- * @property {number} elevation_number
- * @property {string} id
- * @property {number} julian_date
- * @property {number} mseconds
- * @property {HighResData} phi
- * @property {Radial} radial
- * @property {number} radial_length
- * @property {number} radial_number
- * @property {HighResData} [reflect]
- * @property {HighResData} [rho]
- * @property {number} rs
- * @property {number} rsbs
- * @property {HighResData} spectrum
- * @property {number} sp
- * @property {Volume} volume
- * @property {HighResData} [velocity]
- * @property {HighResData} [zdr]
- */
-
-/**
- * @typedef Radial See NOAA documentation for detailed meanings of these values.
- * @property {string} block_type 'R'
- * @property {number} horizontal_calibration
- * @property {number} horizontal_noise_level
- * @property {string} name 'RAD'
- * @property {number} nyquist_velocity
- * @property {number} radial_flags
- * @property {number} size
- * @property {number} unambiguous_range
- * @property {number} vertical_calibration
- * @property {number} vertical_noise_level
- */
-
-/**
- * @typedef Volume See NOAA documentation for detailed meanings of these values.
- * @property {string} block_type 'R'
- * @property {number} calibration
- * @property {number} differential_phase
- * @property {number} differential_reflectivity
- * @property {number} elevation
- * @property {number} feedhorn_height
- * @property {number} latitude
- * @property {number} longitude
- * @property {string} name 'VOL'
- * @property {number} processing_status
- * @property {number} size
- * @property {number} tx_horizontal
- * @property {number} tx_vertical
- * @property {number} version_major
- * @property {number} version_minor
- * @property {number} volume_coverage_pattern
- * @property {number} zdr_bias_estimate
- */
-
 class Level2Radar {
 	/**
 	 * Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 20.0/RPG 20.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002U.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data in a format ready for processing.
+	 * Radar data is accessed through the get* methods
 	 *
 	 * @param {Buffer|Level2Radar} file Buffer with Nexrad Level 2 data. Alternatively a Level2Radar object, typically used internally when combining data.
 	 * @param {object} [options] Parser options
@@ -101,9 +22,34 @@ class Level2Radar {
 				data, header, vcp, hasGaps, isTruncated,
 			} = parseData(file, this.options);
 			this.data = data;
+
+			/**
+			 * @type Header
+			 * @category Metadata
+			 */
 			this.header = header;
+
+			/**
+			 * @type Vcp
+			 * @category Metadata
+			 */
 			this.vcp = vcp;
+
+			/**
+			 * Gaps were found in the source data
+			 *
+			 * @type boolean
+			 * @category Metadata
+			 */
+
 			this.hasGaps = hasGaps;
+
+			/**
+			 * Source data was truncated
+			 *
+			 * @type boolean
+			 * @category Metadata
+			 */
 			this.isTruncated = isTruncated;
 		} else if (typeof file === 'object' && (file.data && file.header && file.vcp)) {
 		// alternative mode data is fed in as a pre-formatted object as the result of the combine static function

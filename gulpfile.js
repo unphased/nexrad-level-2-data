@@ -6,11 +6,14 @@ const del = require('del');
 
 const files = [
 	'src/index.js',
+	'src/parsedata.js',
+	'src/typedefs.js',
 	'README.md',
 ];
 
 const mdConfig = {
 	files,
+	'global-index-format': 'grouped',
 };
 
 const htmlConfig = {

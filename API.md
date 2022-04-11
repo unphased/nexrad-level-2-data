@@ -1,24 +1,43 @@
 ## Classes
 
-<dl>
-<dt><a href="#Level2Radar">Level2Radar</a></dt>
-<dd></dd>
-</dl>
+* [Level2Radar](#Level2Radar)
+    * [new Level2Radar(file, [options])](#new_Level2Radar_new)
+    * _instance_
+        * _Configuration_
+            * [.setElevation(elevation)](#Level2Radar+setElevation)
+        * _Data_
+            * [.getAzimuth([scan])](#Level2Radar+getAzimuth) ⇒ <code>number</code> \| <code>Array.&lt;number&gt;</code>
+            * [.getHighresReflectivity([scan])](#Level2Radar+getHighresReflectivity) ⇒ [<code>HighResData</code>](#HighResData) \| [<code>Array.&lt;HighResData&gt;</code>](#HighResData)
+            * [.getHighresVelocity([scan])](#Level2Radar+getHighresVelocity) ⇒ [<code>HighResData</code>](#HighResData) \| [<code>Array.&lt;HighResData&gt;</code>](#HighResData)
+            * [.getHighresSpectrum([scan])](#Level2Radar+getHighresSpectrum) ⇒ [<code>HighResData</code>](#HighResData) \| [<code>Array.&lt;HighResData&gt;</code>](#HighResData)
+            * [.getHighresDiffReflectivity([scan])](#Level2Radar+getHighresDiffReflectivity) ⇒ [<code>HighResData</code>](#HighResData) \| [<code>Array.&lt;HighResData&gt;</code>](#HighResData)
+            * [.getHighresDiffPhase([scan])](#Level2Radar+getHighresDiffPhase) ⇒ [<code>HighResData</code>](#HighResData) \| [<code>Array.&lt;HighResData&gt;</code>](#HighResData)
+            * [.getHighresCorrelationCoefficient([scan])](#Level2Radar+getHighresCorrelationCoefficient) ⇒ [<code>HighResData</code>](#HighResData) \| [<code>Array.&lt;HighResData&gt;</code>](#HighResData)
+        * _Metadata_
+            * [.header](#Level2Radar+header) : [<code>Header</code>](#Header)
+            * [.vcp](#Level2Radar+vcp) : [<code>Vcp</code>](#Vcp)
+            * [.hasGaps](#Level2Radar+hasGaps) : <code>boolean</code>
+            * [.isTruncated](#Level2Radar+isTruncated) : <code>boolean</code>
+            * [.getScans()](#Level2Radar+getScans) ⇒ <code>number</code>
+            * [.getHeader([scan])](#Level2Radar+getHeader) ⇒ [<code>MessageHeader</code>](#MessageHeader)
+            * [.listElevations()](#Level2Radar+listElevations) ⇒ <code>Array.&lt;number&gt;</code>
+    * _static_
+        * [.combineData(...data)](#Level2Radar.combineData) ⇒ [<code>Level2Radar</code>](#Level2Radar)
+* [parseData](#parseData)
+    * [new parseData(file, [options])](#new_parseData_new)
 
 ## Typedefs
 
-<dl>
-<dt><a href="#HighResData">HighResData</a> : <code>object</code></dt>
-<dd><p>See NOAA documentation for detailed meanings of these values.</p>
-</dd>
-<dt><a href="#MessageHeader">MessageHeader</a> : <code>object</code></dt>
-<dd><p>See NOAA documentation for detailed meanings of these values.</p>
-</dd>
-<dt><a href="#Radial">Radial</a></dt>
-<dd></dd>
-<dt><a href="#Volume">Volume</a></dt>
-<dd></dd>
-</dl>
+* [ParsedData](#ParsedData) : <code>object</code>
+* [HighResData](#HighResData) : <code>object</code>
+* [MessageHeader](#MessageHeader) : <code>object</code>
+* [Radial](#Radial) : <code>object</code>
+* [Volume](#Volume) : <code>object</code>
+* [Header](#Header) : <code>object</code>
+* [Vcp](#Vcp) : <code>object</code>
+* [VcpRecord](#VcpRecord) : <code>object</code>
+* [VcpSequencing](#VcpSequencing) : <code>object</code>
+* [VcpSupplemental](#VcpSupplemental) : <code>object</code>
 
 <a name="Level2Radar"></a>
 
@@ -39,6 +58,10 @@
             * [.getHighresDiffPhase([scan])](#Level2Radar+getHighresDiffPhase) ⇒ [<code>HighResData</code>](#HighResData) \| [<code>Array.&lt;HighResData&gt;</code>](#HighResData)
             * [.getHighresCorrelationCoefficient([scan])](#Level2Radar+getHighresCorrelationCoefficient) ⇒ [<code>HighResData</code>](#HighResData) \| [<code>Array.&lt;HighResData&gt;</code>](#HighResData)
         * _Metadata_
+            * [.header](#Level2Radar+header) : [<code>Header</code>](#Header)
+            * [.vcp](#Level2Radar+vcp) : [<code>Vcp</code>](#Vcp)
+            * [.hasGaps](#Level2Radar+hasGaps) : <code>boolean</code>
+            * [.isTruncated](#Level2Radar+isTruncated) : <code>boolean</code>
             * [.getScans()](#Level2Radar+getScans) ⇒ <code>number</code>
             * [.getHeader([scan])](#Level2Radar+getHeader) ⇒ [<code>MessageHeader</code>](#MessageHeader)
             * [.listElevations()](#Level2Radar+listElevations) ⇒ <code>Array.&lt;number&gt;</code>
@@ -48,7 +71,7 @@
 <a name="new_Level2Radar_new"></a>
 
 ### new Level2Radar(file, [options])
-Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 20.0/RPG 20.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002U.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data in a format ready for processing.
+Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 20.0/RPG 20.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002U.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data in a format ready for processing.Radar data is accessed through the get* methods
 
 
 | Param | Type | Default | Description |
@@ -160,6 +183,30 @@ Returns an Object of radar correlation coefficient data for the current elevatio
 | --- | --- | --- |
 | [scan] | <code>number</code> | Selected scan or null for all scans in elevation |
 
+<a name="Level2Radar+header"></a>
+
+### level2Radar.header : [<code>Header</code>](#Header)
+**Kind**: instance property of [<code>Level2Radar</code>](#Level2Radar)  
+**Category**: Metadata  
+<a name="Level2Radar+vcp"></a>
+
+### level2Radar.vcp : [<code>Vcp</code>](#Vcp)
+**Kind**: instance property of [<code>Level2Radar</code>](#Level2Radar)  
+**Category**: Metadata  
+<a name="Level2Radar+hasGaps"></a>
+
+### level2Radar.hasGaps : <code>boolean</code>
+Gaps were found in the source data
+
+**Kind**: instance property of [<code>Level2Radar</code>](#Level2Radar)  
+**Category**: Metadata  
+<a name="Level2Radar+isTruncated"></a>
+
+### level2Radar.isTruncated : <code>boolean</code>
+Source data was truncated
+
+**Kind**: instance property of [<code>Level2Radar</code>](#Level2Radar)  
+**Category**: Metadata  
 <a name="Level2Radar+getScans"></a>
 
 ### level2Radar.getScans() ⇒ <code>number</code>
@@ -197,6 +244,39 @@ Combines the data returned by multiple runs of the Level2Data constructor. This 
 | Param | Type | Description |
 | --- | --- | --- |
 | ...data | [<code>Level2Radar</code>](#Level2Radar) | Data to combine |
+
+<a name="parseData"></a>
+
+## parseData
+**Kind**: global class  
+<a name="new_parseData_new"></a>
+
+### new parseData(file, [options])
+Internal function. Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`.
+
+**Returns**: <code>object</code> - Intermediate data for use with Level2Radar  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| file | <code>Buffer</code> |  | Buffer with Nexrad Level 2 data. Alternatively a Level2Radar object, typically used internally when combining data. |
+| [options] | <code>object</code> |  | Parser options |
+| [options.logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function. |
+
+<a name="ParsedData"></a>
+
+## ParsedData : <code>object</code>
+Intermediate parsed radar data, further processed by Level2Radar
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| data | <code>object</code> | Grouped and sorted data |
+| header | [<code>Header</code>](#Header) |  |
+| vcp | [<code>Vcp</code>](#Vcp) |  |
+| isTruncated | <code>boolean</code> |  |
+| hasGaps | <code>boolean</code> |  |
 
 <a name="HighResData"></a>
 
@@ -258,7 +338,9 @@ See NOAA documentation for detailed meanings of these values.
 
 <a name="Radial"></a>
 
-## Radial
+## Radial : <code>object</code>
+See NOAA documentation for detailed meanings of these values.
+
 **Kind**: global typedef  
 **Properties**
 
@@ -277,7 +359,9 @@ See NOAA documentation for detailed meanings of these values.
 
 <a name="Volume"></a>
 
-## Volume
+## Volume : <code>object</code>
+See NOAA documentation for detailed meanings of these values.
+
 **Kind**: global typedef  
 **Properties**
 
@@ -300,4 +384,99 @@ See NOAA documentation for detailed meanings of these values.
 | version_minor | <code>number</code> |  |
 | volume_coverage_pattern | <code>number</code> |  |
 | zdr_bias_estimate | <code>number</code> |  |
+
+<a name="Header"></a>
+
+## Header : <code>object</code>
+File header details
+See NOAA documentation for detailed meanings of these values.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| ICAO | <code>string</code> | Radar site identifier |
+| milliseconds | <code>number</code> | Milliseconds since midnight |
+| modified_julian_date | <code>number</code> | Days since Dec 31, 1969 |
+| raw | <code>Buffer</code> | Raw header from file |
+| version | <code>string</code> | Version number |
+
+<a name="Vcp"></a>
+
+## Vcp : <code>object</code>
+Volume coverage pattern
+See NOAA documentation for detailed meanings of these values.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| channel | <code>number</code> | 
+| id_sequence | <code>number</code> | 
+| message_julian_date | <code>number</code> | 
+| message_mseconds | <code>number</code> | 
+| message_size | <code>number</code> | 
+| message_type | <code>number</code> | 
+| record | [<code>VcpRecord</code>](#VcpRecord) | 
+| segment_count | <code>number</code> | 
+| segment_number | <code>number</code> | 
+
+<a name="VcpRecord"></a>
+
+## VcpRecord : <code>object</code>
+See NOAA documentation for detailed meanings of these values.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Description |
+| --- | --- | --- |
+| clutter_number | <code>number</code> |  |
+| elevations | <code>Array.&lt;VcpElevations&gt;</code> |  |
+| message_size | <code>number</code> |  |
+| num_elevations | <code>number</code> |  |
+| pattern_number | <code>number</code> |  |
+| pattern_type | <code>number</code> |  |
+| pulse_width | <code>string</code> |  |
+| reserved1 | <code>number</code> | Reserved per NOAA documentation |
+| reserved2 | <code>number</code> | Reserved per NOAA documentation |
+| vcp_sequencing | [<code>VcpSequencing</code>](#VcpSequencing) |  |
+| vcp_supplemental | [<code>VcpSupplemental</code>](#VcpSupplemental) |  |
+| velocity_resolution | <code>number</code> |  |
+| version | <code>number</code> |  |
+
+<a name="VcpSequencing"></a>
+
+## VcpSequencing : <code>object</code>
+See NOAA documentation for detailed meanings of these values.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| elevations | <code>number</code> | 
+| max_sails_cuts | <code>number</code> | 
+| sequence_active | <code>number</code> | 
+| truncated_vcp | <code>number</code> | 
+
+<a name="VcpSupplemental"></a>
+
+## VcpSupplemental : <code>object</code>
+See NOAA documentation for detailed meanings of these values.
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| base_tilt_vcp | <code>boolean</code> | 
+| mpda_vcp | <code>boolean</code> | 
+| mrle_vcp | <code>boolean</code> | 
+| number_base_tilts | <code>number</code> | 
+| number_mrle_cuts | <code>number</code> | 
+| number_sails_cuts | <code>number</code> | 
+| sails_vcp | <code>number</code> | 
 

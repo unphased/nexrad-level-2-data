@@ -5,17 +5,24 @@ const decompress = require('./decompress');
 const parseHeader = require('./parseheader');
 
 /**
-* Loads the file and parses the data.
-* Returns a promise when completed
-*/
+ * @typedef {object} ParsedData Intermediate parsed radar data, further processed by Level2Radar
+	*	@property {object} data Grouped and sorted data
+	*	@property {Header} header
+	*	@property {Vcp} vcp
+	*	@property {boolean} isTruncated
+	*	@property {boolean} hasGaps
+ */
+
+/**
+ * Internal function. Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`.
+ *
+ * @class parseData
+ * @param {Buffer} file Buffer with Nexrad Level 2 data. Alternatively a Level2Radar object, typically used internally when combining data.
+ * @param {object} [options] Parser options
+ * @param {(object | boolean)} [options.logger=console] By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function.
+ * @returns {object} Intermediate data for use with Level2Radar
+ */
 const parseData = (file, options) => {
-	/**
-					 * Load and access the radar archive file.
-					 * The constructor for RandomAccessFile returns
-					 * a promise. This allows for parsing the data
-					 * after the file has been fully loaded into the
-					 * buffer.
-					 */
 	const rafCompressed = new RandomAccessFile(file, BIG_ENDIAN);
 	const data = [];
 
@@ -28,11 +35,7 @@ const parseData = (file, options) => {
 	let messageOffset31 = 0; // the current message 31 offset
 	let recordNumber = 0; // the record number
 
-	/**
-				 * Loop through all of the messages
-				 * contained within the radar archive file.
-				 * Save all the data we find to it's respective array
-				 */
+	// Loop through all of the messages contained within the radar archive file. Save all the data we find to it's respective array.
 	let r;
 	let vcp = {};
 	let hasGaps = false;
@@ -86,10 +89,8 @@ const parseData = (file, options) => {
 	};
 };
 
-/**
-     * This takes the scans (aka sweeps) and groups them
-     * by their elevation numbers.
-     */
+// This takes the scans (aka sweeps) and groups them
+// by their elevation numbers.
 const groupAndSortScans = (scans) => {
 	const groups = [];
 
@@ -98,10 +99,10 @@ const groupAndSortScans = (scans) => {
 		const { elevation_number: elevationNumber } = scan.record;
 
 		/**
-					 * If the group has already been created
-					 * just push the current scan into the array
-					 * or create a new group for the elevation
-					 */
+		 * If the group has already been created
+		 * just push the current scan into the array
+		 * or create a new group for the elevation
+		 */
 		if (groups[elevationNumber]) {
 			groups[elevationNumber].push(scan);
 		} else {
