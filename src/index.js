@@ -1,14 +1,18 @@
 const parseData = require('./parsedata');
 const combineData = require('./combinedata');
 
+/**
+ * @typedef {object} ParserOptions parser options
+ * @property {(object | boolean)} [options.logger=console] By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function.
+ */
+
 class Level2Radar {
 	/**
 	 * Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 20.0/RPG 20.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002U.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data in a format ready for processing.
 	 * Radar data is accessed through the get* methods
 	 *
 	 * @param {Buffer|Level2Radar} file Buffer with Nexrad Level 2 data. Alternatively a Level2Radar object, typically used internally when combining data.
-	 * @param {object} [options] Parser options
-	 * @param {(object | boolean)} [options.logger=console] By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function.
+	 * @param {ParserOptions} [options] Parser options
 	 */
 
 	constructor(file, options) {

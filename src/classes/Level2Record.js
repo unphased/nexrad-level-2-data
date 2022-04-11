@@ -8,8 +8,17 @@ const parseMessage2 = require('./Level2Record-2');
 const parseMessage31 = require('./Level2Record-31');
 const parseMessage5 = require('./Level2Record-5-7');
 const { level2RecordSearch } = require('./Level2RecordSearch');
+
 /**
- * Returns a record from the loaded radar data
+ * Read a single record from the radar data
+ *
+ * @class Level2Record
+ * @param {RandomAccessFile} raf Random access file
+ * @param {number} record Record number
+ * @param {number} message31Offset Additional record offset caused by message 31 size
+ * @param {Header} header Original parsed file header
+ * @param {ParserOptions} [options] Parser options
+ * @returns {object} Variable data based on message types present in record
  */
 const Level2Record = (raf, record, message31Offset, header, options) => {
 	// calculate header size if not provided (typically in chunks mode)

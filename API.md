@@ -40,9 +40,12 @@
         * [.getPos()](#RandomAccessFile+getPos) ⇒ <code>number</code>
         * [.seek(position)](#RandomAccessFile+seek)
         * [.skip(length)](#RandomAccessFile+skip)
+* [Level2Record](#Level2Record)
+    * [new Level2Record(raf, record, message31Offset, header, [options])](#new_Level2Record_new)
 
 ## Typedefs
 
+* [ParserOptions](#ParserOptions) : <code>object</code>
 * [ParsedData](#ParsedData) : <code>object</code>
 * [HighResData](#HighResData) : <code>object</code>
 * [MessageHeader](#MessageHeader) : <code>object</code>
@@ -89,11 +92,10 @@
 Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 20.0/RPG 20.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002U.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data in a format ready for processing.Radar data is accessed through the get* methods
 
 
-| Param | Type | Default | Description |
-| --- | --- | --- | --- |
-| file | <code>Buffer</code> \| [<code>Level2Radar</code>](#Level2Radar) |  | Buffer with Nexrad Level 2 data. Alternatively a Level2Radar object, typically used internally when combining data. |
-| [options] | <code>object</code> |  | Parser options |
-| [options.logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function. |
+| Param | Type | Description |
+| --- | --- | --- |
+| file | <code>Buffer</code> \| [<code>Level2Radar</code>](#Level2Radar) | Buffer with Nexrad Level 2 data. Alternatively a Level2Radar object, typically used internally when combining data. |
+| [options] | [<code>ParserOptions</code>](#ParserOptions) | Parser options |
 
 <a name="Level2Radar+setElevation"></a>
 
@@ -406,6 +408,37 @@ Advance the pointer forward a set number of bytes
 | Param | Type | Description |
 | --- | --- | --- |
 | length | <code>number</code> | Number of bytes to skip |
+
+<a name="Level2Record"></a>
+
+## Level2Record
+**Kind**: global class  
+<a name="new_Level2Record_new"></a>
+
+### new Level2Record(raf, record, message31Offset, header, [options])
+Read a single record from the radar data
+
+**Returns**: <code>object</code> - Variable data based on message types present in record  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| raf | [<code>RandomAccessFile</code>](#RandomAccessFile) | Random access file |
+| record | <code>number</code> | Record number |
+| message31Offset | <code>number</code> | Additional record offset caused by message 31 size |
+| header | [<code>Header</code>](#Header) | Original parsed file header |
+| [options] | [<code>ParserOptions</code>](#ParserOptions) | Parser options |
+
+<a name="ParserOptions"></a>
+
+## ParserOptions : <code>object</code>
+parser options
+
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options.logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function. |
 
 <a name="ParsedData"></a>
 

@@ -9,6 +9,7 @@ const files = [
 	'src/parsedata.js',
 	'src/typedefs.js',
 	'src/classes/RandomAccessFile.js',
+	'src/classes/Level2Record.js',
 	'README.md',
 ];
 
