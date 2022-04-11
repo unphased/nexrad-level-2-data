@@ -1,4 +1,3 @@
-const { Level2Parser } = require('./Level2Parser');
 const { MESSAGE_HEADER_SIZE } = require('../constants');
 
 // parse message type 31
@@ -71,12 +70,12 @@ module.exports = (raf, message, offset, options) => {
 	let prevBlockStart = 0;
 	// process blocks, the order of the blocks is not guaranteed so the name must be used to select proper parser
 	for (let i = 0; i < dbp.length; i += 1) {
-		// set up the parser
-		const parser = new Level2Parser(raf, dbp[i], offset);
-		const parserStartPos = parser.getPos();
+		// jump to record position
+		const parserStartPos = dbp[i] + offset + MESSAGE_HEADER_SIZE;
+		raf.seek(parserStartPos);
 
 		try {
-			const { name } = blockName(parser);
+			const { name } = blockName(raf);
 			// no error was thrown, store the previous record
 			if (prevRecord && blockTypesFriendly[prevRecord.name]) {
 				// store the record under a friendly name
@@ -91,16 +90,16 @@ module.exports = (raf, message, offset, options) => {
 				let thisRecord = false;
 				switch (name) {
 				case 'VOL':
-					thisRecord = parseVolumeData(parser);
+					thisRecord = parseVolumeData(raf);
 					break;
 				case 'ELV':
-					thisRecord = parseElevationData(parser);
+					thisRecord = parseElevationData(raf);
 					break;
 				case 'RAD':
-					thisRecord = parseRadialData(parser);
+					thisRecord = parseRadialData(raf);
 					break;
 				default:
-					thisRecord = parseMomentData(parser);
+					thisRecord = parseMomentData(raf);
 				}
 				// store returned value for validation checking on next block
 				prevRecord = thisRecord;
@@ -135,24 +134,24 @@ module.exports = (raf, message, offset, options) => {
  * to the record.volume Object
  * See page 114; Section "Data Block #1" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
  */
-const parseVolumeData = (parser) => ({
-	block_type: parser.getDataBlockString(1),
-	name: parser.getDataBlockString(3),
-	size: parser.getDataBlockShort(),
-	version_major: parser.getDataBlockByte(),
-	version_minor: parser.getDataBlockByte(),
-	latitude: parser.getDataBlockFloat(),
-	longitude: parser.getDataBlockFloat(),
-	elevation: parser.getDataBlockShort(),
-	feedhorn_height: parser.getDataBlockShort(),
-	calibration: parser.getDataBlockFloat(),
-	tx_horizontal: parser.getDataBlockFloat(),
-	tx_vertical: parser.getDataBlockFloat(),
-	differential_reflectivity: parser.getDataBlockFloat(),
-	differential_phase: parser.getDataBlockFloat(),
-	volume_coverage_pattern: parser.getDataBlockShort(),
-	processing_status: parser.getDataBlockShort(),
-	zdr_bias_estimate: parser.getDataBlockShort(),
+const parseVolumeData = (raf) => ({
+	block_type: raf.readString(1),
+	name: raf.readString(3),
+	size: raf.readShort(),
+	version_major: raf.read(),
+	version_minor: raf.read(),
+	latitude: raf.readFloat(),
+	longitude: raf.readFloat(),
+	elevation: raf.readShort(),
+	feedhorn_height: raf.readShort(),
+	calibration: raf.readFloat(),
+	tx_horizontal: raf.readFloat(),
+	tx_vertical: raf.readFloat(),
+	differential_reflectivity: raf.readFloat(),
+	differential_phase: raf.readFloat(),
+	volume_coverage_pattern: raf.readShort(),
+	processing_status: raf.readShort(),
+	zdr_bias_estimate: raf.readShort(),
 });
 
 /**
@@ -161,12 +160,12 @@ const parseVolumeData = (parser) => ({
 	 * to the record.elevation Object
 	 * See page 114; Section "Data Block #2" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
 	 */
-const parseElevationData = (parser) => ({
-	block_type: parser.getDataBlockString(1),
-	name: parser.getDataBlockString(3),
-	size: parser.getDataBlockShort(),
-	atmos: parser.getDataBlockShort(),
-	calibration: parser.getDataBlockFloat(),
+const parseElevationData = (raf) => ({
+	block_type: raf.readString(1),
+	name: raf.readString(3),
+	size: raf.readShort(),
+	atmos: raf.readShort(),
+	calibration: raf.readFloat(),
 });
 
 /**
@@ -175,17 +174,17 @@ const parseElevationData = (parser) => ({
 	 * to the record.radial Object
 	 * See page 115; Section "Data Block #3" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
 	 */
-const parseRadialData = (parser) => ({
-	block_type: parser.getDataBlockString(1),
-	name: parser.getDataBlockString(3),
-	size: parser.getDataBlockShort(),
-	unambiguous_range: parser.getDataBlockShort() / 10,
-	horizontal_noise_level: parser.getDataBlockFloat(),
-	vertical_noise_level: parser.getDataBlockFloat(),
-	nyquist_velocity: parser.getDataBlockShort(),
-	radial_flags: parser.getDataBlockShort(),
-	horizontal_calibration: parser.getDataBlockFloat(),
-	vertical_calibration: parser.getDataBlockFloat(),
+const parseRadialData = (raf) => ({
+	block_type: raf.readString(1),
+	name: raf.readString(3),
+	size: raf.readShort(),
+	unambiguous_range: raf.readShort() / 10,
+	horizontal_noise_level: raf.readFloat(),
+	vertical_noise_level: raf.readFloat(),
+	nyquist_velocity: raf.readShort(),
+	radial_flags: raf.readShort(),
+	horizontal_calibration: raf.readFloat(),
+	vertical_calibration: raf.readFloat(),
 });
 
 /**
@@ -195,35 +194,35 @@ const parseRadialData = (parser) => ({
 	 * Object base on what type being parsed
 	 * See page 115-117; Section "Data Block #4-9" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
 	 */
-const parseMomentData = (parser) => {
+const parseMomentData = (raf) => {
 	// initial offset for moment data
 	const data = {
-		block_type: parser.getDataBlockString(1),
-		name: parser.getDataBlockString(3),
-		spare: parser.getDataBlockBytes(4),
-		gate_count: parser.getDataBlockShort(),
-		first_gate: parser.getDataBlockShort() / 1000, // scale int to float 0.001 precision
-		gate_size: parser.getDataBlockShort() / 1000, // scale int to float 0.001 precision
-		rf_threshold: parser.getDataBlockShort() / 10, // scale int to float 0.1 precision
-		snr_threshold: parser.getDataBlockShort() / 1000, // scale int to float 0.001 precision
-		control_flags: parser.getDataBlockByte(),
-		data_size: parser.getDataBlockByte(),
-		scale: parser.getDataBlockFloat(),
-		offset: parser.getDataBlockFloat(),
+		block_type: raf.readString(1),
+		name: raf.readString(3),
+		spare: raf.read(4),
+		gate_count: raf.readShort(),
+		first_gate: raf.readShort() / 1000, // scale int to float 0.001 precision
+		gate_size: raf.readShort() / 1000, // scale int to float 0.001 precision
+		rf_threshold: raf.readShort() / 10, // scale int to float 0.1 precision
+		snr_threshold: raf.readShort() / 1000, // scale int to float 0.001 precision
+		control_flags: raf.read(),
+		data_size: raf.read(),
+		scale: raf.readFloat(),
+		offset: raf.readFloat(),
 		moment_data: [],
 	};
 
 	// allow for different sized data blocks
-	let getDataBlock = parser.getDataBlockByte.bind(parser);
+	let getDataBlock = raf.read.bind(raf);
 	let inc = 1;
 	if (data.data_size === 16) {
-		getDataBlock = parser.getDataBlockShort.bind(parser);
+		getDataBlock = raf.readShort.bind(raf);
 		inc = 2;
 	}
 
 	const endI = data.gate_count * inc + MESSAGE_HEADER_SIZE;
 
-	parser.seek(MESSAGE_HEADER_SIZE);
+	raf.seek(MESSAGE_HEADER_SIZE);
 	for (let i = MESSAGE_HEADER_SIZE; i < endI; i += inc) {
 		const val = getDataBlock();
 		// per documentation 0 = below threshold, 1 = range folding
@@ -238,17 +237,17 @@ const parseMomentData = (parser) => {
 
 // return the block name and return the pointer to the begining of the block
 // return false if "D" is not present at byte 0
-const blockName = (parser) => {
+const blockName = (raf) => {
 	// get data
-	const type = parser.getDataBlockString(1);
-	const name = parser.getDataBlockString(3);
+	const type = raf.readString(1);
+	const name = raf.readString(3);
 
 	// skip back
-	parser.seek(0);
+	raf.skip(-4);
 
 	// basic data integrity check
 	if (!(type === 'D' || type === 'R')) {
-		throw new Error(`Invalid data block type: 0x${(type.charCodeAt(0) || 0).toString(16).padStart(2, '0')} at ${parser.getPos()}`);
+		throw new Error(`Invalid data block type: 0x${(type.charCodeAt(0) || 0).toString(16).padStart(2, '0')} at ${raf.getPos()}`);
 	}
 	return { name, type };
 };
