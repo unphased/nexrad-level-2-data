@@ -1,14 +1,102 @@
 const parseData = require('./parsedata');
 const combineData = require('./combinedata');
 
+/**
+ *
+ * @typedef {object} HighResData See NOAA documentation for detailed meanings of these values.
+ * @property {number} gate_count
+ * @property {number} gate_size
+ * @property {number} first_gate
+ * @property {number} rf_threshold
+ * @property {number} snr_threshold
+ * @property {number} scale
+ * @property {number} offset
+ * @property {string} block_type 'D'
+ * @property {number} control_flags
+ * @property {number} data_size
+ * @property {string} name 'REF', 'VEL', 'SW ', 'ZDR', 'PHI', 'RHO'
+ * @property {Buffer[]} spare Spare data per the documentation
+ * @property {number[]} moment_data Scaled data
+ */
+
+/**
+ * @typedef {object} MessageHeader See NOAA documentation for detailed meanings of these values.
+ * @property {number} aim
+ * @property {number} ars
+ * @property {number} compress_idx
+ * @property {number} cut
+ * @property {number} dcount
+ * @property {number} elevation_angle
+ * @property {number} elevation_number
+ * @property {string} id
+ * @property {number} julian_date
+ * @property {number} mseconds
+ * @property {HighResData} phi
+ * @property {Radial} radial
+ * @property {number} radial_length
+ * @property {number} radial_number
+ * @property {HighResData} [reflect]
+ * @property {HighResData} [rho]
+ * @property {number} rs
+ * @property {number} rsbs
+ * @property {HighResData} spectrum
+ * @property {number} sp
+ * @property {Volume} volume
+ * @property {HighResData} [velocity]
+ * @property {HighResData} [zdr]
+ */
+
+/**
+ * @typedef Radial See NOAA documentation for detailed meanings of these values.
+ * @property {string} block_type 'R'
+ * @property {number} horizontal_calibration
+ * @property {number} horizontal_noise_level
+ * @property {string} name 'RAD'
+ * @property {number} nyquist_velocity
+ * @property {number} radial_flags
+ * @property {number} size
+ * @property {number} unambiguous_range
+ * @property {number} vertical_calibration
+ * @property {number} vertical_noise_level
+ */
+
+/**
+ * @typedef Volume See NOAA documentation for detailed meanings of these values.
+ * @property {string} block_type 'R'
+ * @property {number} calibration
+ * @property {number} differential_phase
+ * @property {number} differential_reflectivity
+ * @property {number} elevation
+ * @property {number} feedhorn_height
+ * @property {number} latitude
+ * @property {number} longitude
+ * @property {string} name 'VOL'
+ * @property {number} processing_status
+ * @property {number} size
+ * @property {number} tx_horizontal
+ * @property {number} tx_vertical
+ * @property {number} version_major
+ * @property {number} version_minor
+ * @property {number} volume_coverage_pattern
+ * @property {number} zdr_bias_estimate
+ */
+
 class Level2Radar {
-	constructor(file, _options) {
+	/**
+	 * Parses a Nexrad Level 2 Data archive or chunk. Provide `rawData` as a `Buffer`. Returns an object formatted per the [ICD FOR RDA/RPG - Build RDA 20.0/RPG 20.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002U.pdf), or as close as can reasonably be represented in a javascript object. Additional data accessors are provided in the returned object to pull out typical data in a format ready for processing.
+	 *
+	 * @param {Buffer|Level2Radar} file Buffer with Nexrad Level 2 data. Alternatively a Level2Radar object, typically used internally when combining data.
+	 * @param {object} [options] Parser options
+	 * @param {(object | boolean)} [options.logger=console] By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function.
+	 */
+
+	constructor(file, options) {
 		// combine options with defaults
 		this.elevation = 1;	// 1 based per NOAA documentation
 		// default mode, parse file from buffer
 		if (file instanceof Buffer) {
 		// options and defaults
-			this.options = combineOptions(_options);
+			this.options = combineOptions(options);
 			const {
 				data, header, vcp, hasGaps, isTruncated,
 			} = parseData(file, this.options);
@@ -31,10 +119,24 @@ class Level2Radar {
 		}
 	}
 
+	/**
+	 * Sets the elevation in use for get* methods
+	 *
+	 * @param {number} elevation Selected elevation number
+	 * @category Configuration
+	 */
 	setElevation(elevation) {
 		this.elevation = elevation;
 	}
 
+	/**
+	 * Returns an single azimuth value or array of azimuth values for the current elevation and scan (or all scans if not provided).
+	 * The order of azimuths in the returned array matches the order of the data in other get* functions.
+	 *
+	 * @param {number} [scan] Selected scan
+	 * @category Data
+	 * @returns {number|number[]} Azimuth angle
+	 */
 	getAzimuth(scan) {
 		// error checking
 		if (this?.data?.[this.elevation] === undefined) throw new Error(`getAzimuth invalid elevation selected: ${this.elevation}`);
@@ -51,6 +153,12 @@ class Level2Radar {
 		return this.data[this.elevation].map((i) => i.record.azimuth);
 	}
 
+	/**
+	 * Return the number of scans in the current elevation
+	 *
+	 * @category Metadata
+	 * @returns {number}
+	 */
 	getScans() {
 		// error checking
 		this._checkData();
@@ -58,23 +166,13 @@ class Level2Radar {
 		return this.data[this.elevation].length;
 	}
 
-	// return reflectivity data for the current elevation and scan
-	getHighresReflectivity(scan) {
-		// error checking
-		this._checkData();
-		if (this?.data?.[this.elevation] === undefined) throw new Error(`getHighresReflectivity invalid elevation selected: ${this.elevation}`);
-
-		if (scan !== undefined) {
-			// error checking
-			if (this?.data?.[this.elevation]?.[scan] === undefined) throw new Error(`getHighresReflectivity invalid scan selected: ${scan}`);
-			if (this?.data?.[this.elevation]?.[scan]?.record?.reflect === undefined) throw new Error(`getHighresReflectivity no data for elevation: ${this.elevation}, scan: ${scan}`);
-			// return data
-			return this.data[this.elevation][scan].record.reflect;
-		}
-		return this.data[this.elevation].map((i) => i.record.reflect);
-	}
-
-	// return message_header information
+	/**
+	 * Return message_header information for all scans or a specific scan for the selected elevation
+	 *
+	 * @category Metadata
+	 * @param {number} [scan] Selected scan, omit to return all scans for this elevation
+	 * @returns {MessageHeader}
+	 */
 	getHeader(scan) {
 		// error checking
 		this._checkData();
@@ -90,7 +188,35 @@ class Level2Radar {
 		return this.data[this.elevation].map(((i) => i.record));
 	}
 
-	// return velocity data for the current elevation and scan
+	/**
+	 * Returns an Object of radar reflectivity data for the current elevation and scan (or all scans if not provided)
+	 *
+	 * @category Data
+	 * @param {number} [scan] Selected scan or null for all scans in elevation
+	 * @returns {HighResData|HighResData[]} Scan's high res reflectivity data, or an array of the data.
+	 */
+	getHighresReflectivity(scan) {
+		// error checking
+		this._checkData();
+		if (this?.data?.[this.elevation] === undefined) throw new Error(`getHighresReflectivity invalid elevation selected: ${this.elevation}`);
+
+		if (scan !== undefined) {
+			// error checking
+			if (this?.data?.[this.elevation]?.[scan] === undefined) throw new Error(`getHighresReflectivity invalid scan selected: ${scan}`);
+			if (this?.data?.[this.elevation]?.[scan]?.record?.reflect === undefined) throw new Error(`getHighresReflectivity no data for elevation: ${this.elevation}, scan: ${scan}`);
+			// return data
+			return this.data[this.elevation][scan].record.reflect;
+		}
+		return this.data[this.elevation].map((i) => i.record.reflect);
+	}
+
+	/**
+	 * Returns an Object of radar velocity data for the current elevation and scan (or all scans if not provided)
+	 *
+	 * @category Data
+	 * @param {number} [scan] Selected scan, or null for all scans in this elevation
+	 * @returns {HighResData|HighResData[]} Scan's high res velocity data, or an array of the data.
+	 */
 	getHighresVelocity(scan) {
 		// error checking
 		this._checkData();
@@ -107,7 +233,13 @@ class Level2Radar {
 		return this.data[this.elevation].map((i) => i.record.velocity);
 	}
 
-	// return spectrum data for the current elevation and scan
+	/**
+	 * Returns an Object of radar spectrum data for the current elevation and scan (or all scans if not provided)
+	 *
+	 * @category Data
+	 * @param {number} [scan] Selected scan, or null for all scans in this elevation
+	 * @returns {HighResData|HighResData[]} Scan's high res spectrum data, or an array of the data.
+	 */
 	getHighresSpectrum(scan) {
 		// error checking
 		this._checkData();
@@ -123,7 +255,13 @@ class Level2Radar {
 		return this.data[this.elevation].map((i) => i.record.spectrum);
 	}
 
-	// return diff reflectivity data for the current elevation and scan
+	/**
+	 * Returns an Object of radar differential reflectivity data for the current elevation and scan (or all scans if not provided)
+	 *
+	 * @category Data
+	 * @param {number} [scan] Selected scan or null for all scans in elevation
+	 * @returns {HighResData|HighResData[]} Scan's high res differential reflectivity data, or an array of the data.
+	 */
 	getHighresDiffReflectivity(scan) {
 		// error checking
 		this._checkData();
@@ -139,7 +277,13 @@ class Level2Radar {
 		return this.data[this.elevation].map((i) => i.record.zdr);
 	}
 
-	// return diff phase data for the current elevation and scan
+	/**
+	 * Returns an Object of radar differential phase data for the current elevation and scan (or all scans if not provided)
+	 *
+	 * @category Data
+	 * @param {number} [scan] Selected scan or null for all scans in elevation
+	 * @returns {HighResData|HighResData[]} Scan's high res differential phase data, or an array of the data.
+	 */
 	getHighresDiffPhase(scan) {
 		// error checking
 		this._checkData();
@@ -155,7 +299,13 @@ class Level2Radar {
 		return this.data[this.elevation].map((i) => i.record.phi);
 	}
 
-	// return correlation coefficient data for the current elevation and scan
+	/**
+	 * Returns an Object of radar correlation coefficient data for the current elevation and scan (or all scans if not provided)
+	 *
+	 * @category Data
+	 * @param {number} [scan] Selected scan or null for all scans in elevation
+	 * @returns {HighResData|HighResData[]} Scan's high res correlation coefficient data, or an array of the data.
+	 */
 	getHighresCorrelationCoefficient(scan) {
 		// error checking
 		this._checkData();
@@ -171,6 +321,12 @@ class Level2Radar {
 		return this.data[this.elevation].map((i) => i.record.rho);
 	}
 
+	/**
+	 * List all available elevations
+	 *
+	 * @category Metadata
+	 * @returns {number[]}
+	 */
 	listElevations() {
 		return Object.keys(this.data).map((key) => +key);
 	}
@@ -179,11 +335,19 @@ class Level2Radar {
 		if (this.data.length === 0) throw new Error('No data found in file');
 	}
 
-	static combineData(...args) {
-		const data = combineData(args);
+	/**
+	 * Combines the data returned by multiple runs of the Level2Data constructor. This is typically used in "chunks" mode to combine all azimuths from one revolution into a single data set. data can be provided as an array of Level2Radar objects, individual Level2Data parameters or any combination thereof.
+	 *
+	 * The combine function blindly combines data and the right-most argument will overwrite any previously provided data. Individual azimuths located in Level2Radar.data[] will be appended. It is up to the calling routine to properly manage the parsing of related chunks and send it in to this routine.
+	 *
+	 * @param  {...Level2Radar} data Data to combine
+	 * @returns {Level2Radar} Combined data
+	 */
+	static combineData(...data) {
+		const combined = combineData(data);
 
 		// pass through constructor alternative signature to get a Level2Object
-		return new Level2Radar(data);
+		return new Level2Radar(combined);
 	}
 }
 

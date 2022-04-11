@@ -16,4 +16,5 @@ const fileToLoad = './data/KLOT20220317_000842_V06'; // The radar archive file t
 	console.timeEnd('load-uncompressed');
 	const reflectivity = radar.getHighresReflectivity();
 	console.log(reflectivity);
+	radar.getHeader();
 })();

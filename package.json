@@ -4,7 +4,8 @@
   "description": "Decode Nexrad Level II radar archive files",
   "main": "./src/index.js",
   "scripts": {
-    "test": "node test.js"
+    "test": "node test.js",
+    "docs": "npx gulp docs"
   },
   "repository": {
     "type": "git",
@@ -28,10 +29,16 @@
     "seek-bzip": "^2.0.0"
   },
   "devDependencies": {
+    "del": "^6.0.0",
     "eslint": "^8.0.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.22.1",
-    "glob": "^7.1.7"
+    "eslint-plugin-jsdoc": "^39.1.0",
+    "glob": "^7.1.7",
+    "gulp": "^4.0.2",
+    "gulp-jsdoc3": "^3.0.0",
+    "jsdoc": "^3.6.10",
+    "jsdoc-to-markdown": "^7.1.1"
   },
   "engines": {
     "node": ">=13.0.0"
