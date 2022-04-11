@@ -25,6 +25,21 @@
         * [.combineData(...data)](#Level2Radar.combineData) ⇒ [<code>Level2Radar</code>](#Level2Radar)
 * [parseData](#parseData)
     * [new parseData(file, [options])](#new_parseData_new)
+* [RandomAccessFile](#RandomAccessFile)
+    * [new RandomAccessFile(file, endian)](#new_RandomAccessFile_new)
+    * _Data_
+        * [.readString(length)](#RandomAccessFile+readString) ⇒ <code>string</code>
+        * [.readFloat()](#RandomAccessFile+readFloat) ⇒ <code>number</code>
+        * [.readInt()](#RandomAccessFile+readInt) ⇒ <code>number</code>
+        * [.readShort()](#RandomAccessFile+readShort) ⇒ <code>number</code>
+        * [.readSignedInt()](#RandomAccessFile+readSignedInt) ⇒ <code>number</code>
+        * [.readByte()](#RandomAccessFile+readByte) ⇒ <code>number</code>
+        * [.read(length)](#RandomAccessFile+read) ⇒ <code>number</code> \| <code>Array.&lt;number&gt;</code>
+    * _Positioning_
+        * [.getLength()](#RandomAccessFile+getLength) ⇒ <code>number</code>
+        * [.getPos()](#RandomAccessFile+getPos) ⇒ <code>number</code>
+        * [.seek(position)](#RandomAccessFile+seek)
+        * [.skip(length)](#RandomAccessFile+skip)
 
 ## Typedefs
 
@@ -261,6 +276,136 @@ Internal function. Parses a Nexrad Level 2 Data archive or chunk. Provide `rawDa
 | file | <code>Buffer</code> |  | Buffer with Nexrad Level 2 data. Alternatively a Level2Radar object, typically used internally when combining data. |
 | [options] | <code>object</code> |  | Parser options |
 | [options.logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function. |
+
+<a name="RandomAccessFile"></a>
+
+## RandomAccessFile
+**Kind**: global class  
+
+* [RandomAccessFile](#RandomAccessFile)
+    * [new RandomAccessFile(file, endian)](#new_RandomAccessFile_new)
+    * _Data_
+        * [.readString(length)](#RandomAccessFile+readString) ⇒ <code>string</code>
+        * [.readFloat()](#RandomAccessFile+readFloat) ⇒ <code>number</code>
+        * [.readInt()](#RandomAccessFile+readInt) ⇒ <code>number</code>
+        * [.readShort()](#RandomAccessFile+readShort) ⇒ <code>number</code>
+        * [.readSignedInt()](#RandomAccessFile+readSignedInt) ⇒ <code>number</code>
+        * [.readByte()](#RandomAccessFile+readByte) ⇒ <code>number</code>
+        * [.read(length)](#RandomAccessFile+read) ⇒ <code>number</code> \| <code>Array.&lt;number&gt;</code>
+    * _Positioning_
+        * [.getLength()](#RandomAccessFile+getLength) ⇒ <code>number</code>
+        * [.getPos()](#RandomAccessFile+getPos) ⇒ <code>number</code>
+        * [.seek(position)](#RandomAccessFile+seek)
+        * [.skip(length)](#RandomAccessFile+skip)
+
+<a name="new_RandomAccessFile_new"></a>
+
+### new RandomAccessFile(file, endian)
+Store a buffer or string and add functionality for random accessUnless otherwise noted all read functions advance the file's pointer by the length of the data read
+
+
+| Param | Type | Description |
+| --- | --- | --- |
+| file | <code>Buffer</code> \| <code>string</code> | A file as a string or Buffer to load for random access |
+| endian | <code>number</code> | Endianess of the file constants BIG_ENDIAN and LITTLE_ENDIAN are provided |
+
+<a name="RandomAccessFile+readString"></a>
+
+### randomAccessFile.readString(length) ⇒ <code>string</code>
+Read a string of a specificed length from the buffer
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Data  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| length | <code>number</code> | Length of string to read |
+
+<a name="RandomAccessFile+readFloat"></a>
+
+### randomAccessFile.readFloat() ⇒ <code>number</code>
+Read a float from the buffer
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Data  
+<a name="RandomAccessFile+readInt"></a>
+
+### randomAccessFile.readInt() ⇒ <code>number</code>
+Read a 4-byte unsigned integer from the buffer
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Data  
+<a name="RandomAccessFile+readShort"></a>
+
+### randomAccessFile.readShort() ⇒ <code>number</code>
+Read a 2-byte unsigned integer from the buffer
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Data  
+<a name="RandomAccessFile+readSignedInt"></a>
+
+### randomAccessFile.readSignedInt() ⇒ <code>number</code>
+Read a 2-byte signed integer from the buffer
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Data  
+<a name="RandomAccessFile+readByte"></a>
+
+### randomAccessFile.readByte() ⇒ <code>number</code>
+Read a single byte from the buffer
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Data  
+<a name="RandomAccessFile+read"></a>
+
+### randomAccessFile.read(length) ⇒ <code>number</code> \| <code>Array.&lt;number&gt;</code>
+Read a set number of bytes from the buffer
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Returns**: <code>number</code> \| <code>Array.&lt;number&gt;</code> - number if length = 1, otherwise number[]  
+**Category**: Data  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| length | <code>number</code> | <code>1</code> | Number of bytes to read |
+
+<a name="RandomAccessFile+getLength"></a>
+
+### randomAccessFile.getLength() ⇒ <code>number</code>
+Get buffer length
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Positioning  
+<a name="RandomAccessFile+getPos"></a>
+
+### randomAccessFile.getPos() ⇒ <code>number</code>
+Get current position in the file
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Positioning  
+<a name="RandomAccessFile+seek"></a>
+
+### randomAccessFile.seek(position)
+Seek to a provided buffer offset
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Positioning  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| position | <code>number</code> | Byte offset |
+
+<a name="RandomAccessFile+skip"></a>
+
+### randomAccessFile.skip(length)
+Advance the pointer forward a set number of bytes
+
+**Kind**: instance method of [<code>RandomAccessFile</code>](#RandomAccessFile)  
+**Category**: Positioning  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| length | <code>number</code> | Number of bytes to skip |
 
 <a name="ParsedData"></a>
 
