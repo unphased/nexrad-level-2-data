@@ -28,7 +28,7 @@
  * @property {string} id
  * @property {number} julian_date
  * @property {number} mseconds
- * @property {HighResData} phi
+ * @property {HighResData} [phi]
  * @property {Radial} radial
  * @property {number} radial_length
  * @property {number} radial_number
@@ -36,7 +36,7 @@
  * @property {HighResData} [rho]
  * @property {number} rs
  * @property {number} rsbs
- * @property {HighResData} spectrum
+ * @property {HighResData} [spectrum]
  * @property {number} sp
  * @property {Volume} volume
  * @property {HighResData} [velocity]

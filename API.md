@@ -438,7 +438,7 @@ parser options
 
 | Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| [logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function. |
+| [logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() functions. |
 
 <a name="ParsedData"></a>
 
@@ -500,7 +500,7 @@ See NOAA documentation for detailed meanings of these values.
 | id | <code>string</code> | 
 | julian_date | <code>number</code> | 
 | mseconds | <code>number</code> | 
-| phi | [<code>HighResData</code>](#HighResData) | 
+| [phi] | [<code>HighResData</code>](#HighResData) | 
 | radial | [<code>Radial</code>](#Radial) | 
 | radial_length | <code>number</code> | 
 | radial_number | <code>number</code> | 
@@ -508,7 +508,7 @@ See NOAA documentation for detailed meanings of these values.
 | [rho] | [<code>HighResData</code>](#HighResData) | 
 | rs | <code>number</code> | 
 | rsbs | <code>number</code> | 
-| spectrum | [<code>HighResData</code>](#HighResData) | 
+| [spectrum] | [<code>HighResData</code>](#HighResData) | 
 | sp | <code>number</code> | 
 | volume | [<code>Volume</code>](#Volume) | 
 | [velocity] | [<code>HighResData</code>](#HighResData) | 

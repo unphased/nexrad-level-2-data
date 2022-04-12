@@ -48,9 +48,7 @@ new Level2Radar(rawData).then(radar => {
 
 ## API
 
-### Constructor(rawData, options)
-
-Complete [API documentation](../API.md)
+Complete [API documentation](API.md)
 
 ## Testing
 A formal testing suite is not provided. Several `test-*.js` are provided with matching data in the `./data` folder. These can be run individually as shown below.

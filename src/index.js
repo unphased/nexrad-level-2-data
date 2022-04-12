@@ -3,7 +3,7 @@ const combineData = require('./combinedata');
 
 /**
  * @typedef {object} ParserOptions parser options
- * @property {(object | boolean)} [logger=console] By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function.
+ * @property {(object | boolean)} [logger=console] By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() functions.
  */
 
 class Level2Radar {
