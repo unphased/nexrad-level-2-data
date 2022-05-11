@@ -37,11 +37,20 @@
 		{
 			"type": "node",
 			"request": "launch",
-			"name": "Launch Program",
+			"name": "Test Single",
 			"skipFiles": [
 				"<node_internals>/**"
 			],
 			"program": "${workspaceFolder}/test.js"
+		},
+		{
+			"type": "node",
+			"request": "launch",
+			"name": "Test Group",
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+			"program": "${workspaceFolder}/test-group.js"
 		}
 	]
 }
