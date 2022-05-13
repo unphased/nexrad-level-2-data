@@ -133,6 +133,8 @@ module.exports = (raf, message, offset, options) => {
  * from the data blocks. Then save that data
  * to the record.volume Object
  * See page 114; Section "Data Block #1" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
+ *
+ * @param raf
  */
 const parseVolumeData = (raf) => ({
 	block_type: raf.readString(1),
@@ -155,11 +157,13 @@ const parseVolumeData = (raf) => ({
 });
 
 /**
-	 * Creates a new parser and grabs the data
-	 * from the data blocks. Then save that data
-	 * to the record.elevation Object
-	 * See page 114; Section "Data Block #2" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
-	 */
+ * Creates a new parser and grabs the data
+ * from the data blocks. Then save that data
+ * to the record.elevation Object
+ * See page 114; Section "Data Block #2" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
+ *
+ * @param raf
+ */
 const parseElevationData = (raf) => ({
 	block_type: raf.readString(1),
 	name: raf.readString(3),
@@ -169,11 +173,13 @@ const parseElevationData = (raf) => ({
 });
 
 /**
-	 * Creates a new parser and grabs the data
-	 * from the data blocks. Then save that data
-	 * to the record.radial Object
-	 * See page 115; Section "Data Block #3" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
-	 */
+ * Creates a new parser and grabs the data
+ * from the data blocks. Then save that data
+ * to the record.radial Object
+ * See page 115; Section "Data Block #3" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
+ *
+ * @param raf
+ */
 const parseRadialData = (raf) => ({
 	block_type: raf.readString(1),
 	name: raf.readString(3),
@@ -188,12 +194,14 @@ const parseRadialData = (raf) => ({
 });
 
 /**
-	 * Creates a new parser and grabs the data
-	 * from the data blocks. Then save that data
-	 * to the record.(reflect|velocity|spectrum|zdr|phi|rho)
-	 * Object base on what type being parsed
-	 * See page 115-117; Section "Data Block #4-9" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
-	 */
+ * Creates a new parser and grabs the data
+ * from the data blocks. Then save that data
+ * to the record.(reflect|velocity|spectrum|zdr|phi|rho)
+ * Object base on what type being parsed
+ * See page 115-117; Section "Data Block #4-9" https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/RDA_RPG_2620002P.pdf
+ *
+ * @param raf
+ */
 const parseMomentData = (raf) => {
 	// initial offset for moment data
 	const data = {
@@ -220,10 +228,11 @@ const parseMomentData = (raf) => {
 		inc = 2;
 	}
 
-	const endI = data.gate_count * inc + MESSAGE_HEADER_SIZE;
+	// const endI = data.gate_count * inc + MESSAGE_HEADER_SIZE;
+	const endI = data.gate_count * inc;
 
-	raf.seek(MESSAGE_HEADER_SIZE);
-	for (let i = MESSAGE_HEADER_SIZE; i < endI; i += inc) {
+	// raf.skip(MESSAGE_HEADER_SIZE);
+	for (let i = 0; i < endI; i += inc) {
 		const val = getDataBlock();
 		// per documentation 0 = below threshold, 1 = range folding
 		if (val >= 2) {
