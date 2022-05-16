@@ -35,7 +35,7 @@ const search = (raf, date, options) => {
 				// calculate the begining of the next block after the checks above including 6*2 bytes at the start of the header that we don't use for searching
 				const foundAt = raf.getPos() - skipBack - 6;
 
-				options.logger.log(`Found next block at ${foundAt}`);
+				options.logger.warn(`Found next block at ${foundAt}`);
 				// return the actual block length
 				return foundAt;
 			}

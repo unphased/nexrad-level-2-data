@@ -27,7 +27,7 @@ module.exports = (raf, message, offset, options) => {
 		if (record.mseconds > 86401000) throw new Error(`Invalid timestamp (ms): ${record.mseconds}`); // account for leap second
 	} catch (e) {
 		// return the un-altered message
-		options.logger.error(e.message);
+		options.logger.warn(e.message);
 		return message;
 	}
 	message.record = record;
@@ -109,7 +109,7 @@ module.exports = (raf, message, offset, options) => {
 			// store the previous block position since this block was ok
 			prevBlockStart = parserStartPos;
 		} catch (e) {
-			options.logger.log(e.message);
+			options.logger.warn(e.message);
 			// clear out the previous record
 			prevRecord = false;
 

@@ -59,7 +59,7 @@ module.exports = (raf, message, options) => {
 			}
 			message.record.reflect = reflectivity;
 		} catch (e) {
-			options.logger.error(e.message);
+			options.logger.warn(e.message);
 		}
 	}
 
@@ -86,7 +86,7 @@ module.exports = (raf, message, options) => {
 			}
 			message.record.velocity = velocity;
 		} catch (e) {
-			options.logger.error(e.message);
+			options.logger.warn(e.message);
 		}
 	}
 	// process spectrum width

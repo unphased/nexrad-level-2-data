@@ -314,6 +314,7 @@ const combineOptions = (newOptions) => {
 const nullLogger = {
 	log: () => {},
 	error: () => {},
+	warn: () => {},
 };
 
 module.exports.Level2Radar = Level2Radar;
