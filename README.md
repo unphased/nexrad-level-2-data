@@ -2,7 +2,8 @@
 
 > A javascript implementation for decoding Nexrad Level II radar archive files.
 
-You can find more information on how radar data is encoded at [NOAA](https://www.roc.noaa.gov/WSR88D/BuildInfo/Files.aspx) mainly in the document [ICD FOR RDA/RPG - Build RDA 20.0/RPG 20.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002U.pdf)
+# Demo
+A live demo showing the output of this library (via [nexrad-level-2-plot](https://www.github.com/netbymatt/nexrad-level-2-plot)) for select radar sites is available at https://nexrad-demo.netbymatt.com/
 
 ## Contents
 1. [Changes in v2.0.0](#changes-in-v200)
@@ -12,6 +13,7 @@ You can find more information on how radar data is encoded at [NOAA](https://www
 1. [Testing](#testing)
 1. [Error Recovery and handling](#error-recovery-and-handling)
 1. [Supported Messages](#supported-messages)
+1. [Source Data Documentation](#source-data-documentation)
 1. [Acknowledgements](#acknowledgements)
 
 ## Changes in v2.0.0
@@ -87,6 +89,9 @@ Nexrad data is stored as message types. This package currently processes the fol
 |5|Volume Coverage Pattern|Overview of the scanning paramaters|
 |7|Volume Coverage Pattern|Overview of the scanning paramaters|
 |31|Digital Radar Data Generic Format|Reflectivity and velocity data
+
+## Source Data Documentation
+You can find more information on how radar data is encoded at [NOAA](https://www.roc.noaa.gov/WSR88D/BuildInfo/Files.aspx) mainly in the document [ICD FOR RDA/RPG - Build RDA 20.0/RPG 20.0 (PDF)](https://www.roc.noaa.gov/wsr88d/PublicDocs/ICDs/2620002U.pdf)
 
 ## Acknowledgements
 This work is based on the project of [Unidata](https://github.com/Unidata/thredds/blob/master/cdm/src/main/java/ucar/nc2/iosp/nexrad2/)
