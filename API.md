@@ -277,7 +277,7 @@ Internal function. Parses a Nexrad Level 2 Data archive or chunk. Provide `rawDa
 | --- | --- | --- | --- |
 | file | <code>Buffer</code> |  | Buffer with Nexrad Level 2 data. Alternatively a Level2Radar object, typically used internally when combining data. |
 | [options] | <code>object</code> |  | Parser options |
-| [options.logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log() and error() function. |
+| [options.logger] | <code>object</code> \| <code>boolean</code> | <code>console</code> | By default error and information messages will be written to the console. These can be suppressed by passing false, or a custom logger can be provided. A custom logger must provide the log(), warn() and error() function. |
 
 <a name="RandomAccessFile"></a>
 
