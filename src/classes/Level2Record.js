@@ -70,4 +70,4 @@ const getRecord = (raf, recordOffset, options) => {
 	}
 };
 
-module.exports.Level2Record = Level2Record;
+module.exports = { Level2Record };
