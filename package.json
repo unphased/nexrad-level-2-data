@@ -38,7 +38,8 @@
     "gulp": "^5.0.0",
     "gulp-jsdoc3": "^3.0.0",
     "jsdoc": "^4.0.3",
-    "jsdoc-to-markdown": "^8.0.0"
+    "jsdoc-to-markdown": "^8.0.0",
+    "typescript": "^5.4.5"
   },
   "engines": {
     "node": ">=13.0.0"
